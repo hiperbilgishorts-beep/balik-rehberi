@@ -18,6 +18,9 @@ export type Fish = {
   habitat: string | null;
 };
 
-export type WaterBodyDistance = WaterBody & {
-  distance_km?: number;
+export type WaterBodyDistance = WaterBody & { distance_km?: number };
+
+export type WaterBodyDetail = {
+  waterBody: WaterBody;
+  fish: Fish[];
 };
