@@ -1,64 +1,21 @@
 export type WaterBody = {
-  id: string;
-  name: string;
-  water_type: string | null;
-  province: string | null;
-  district: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  fishing_allowed: boolean | null;
-  verification_level: string | null;
-  access_level?: string | null;
-  location_precision?: string | null;
-  source_url?: string | null;
-  last_verified_at?: string | null;
-  verification_notes?: string | null;
+  id: string; name: string; water_type: string | null; province: string | null; district: string | null;
+  latitude: number | null; longitude: number | null; fishing_allowed: boolean | null;
+  verification_level: string | null; access_level?: string | null; location_precision?: string | null;
+  source_url?: string | null; last_verified_at?: string | null; verification_notes?: string | null;
 };
-
-export type Fish = {
-  id: string;
-  common_name_tr: string;
-  scientific_name: string | null;
-  description: string | null;
-  habitat: string | null;
-};
-
+export type Fish = { id: string; common_name_tr: string; scientific_name: string | null; description: string | null; habitat: string | null };
 export type FishingMethod = { id: string; name: string; description: string | null };
 export type Bait = { id: string; name: string; description: string | null; notes?: string | null };
 export type FishMethod = FishingMethod & { suitable_for?: string | null };
 export type FishBait = Bait;
-export type FishingRule = {
-  id: string;
-  title: string;
-  summary: string;
-  source_url: string | null;
-  effective_from: string | null;
-  effective_to: string | null;
-};
-
-export type FishActivity = {
-  id: string;
-  month: number;
-  activity_level: 'low' | 'medium' | 'high';
-  depth_note: string | null;
-  method_note: string | null;
-  bait_note: string | null;
-  source_url: string | null;
-  last_verified_at: string | null;
-};
-
-export type FishDetail = {
-  fish: Fish;
-  methods: FishMethod[];
-  baits: FishBait[];
-  rules: FishingRule[];
-  waterBodies: WaterBody[];
-  activity: FishActivity[];
-};
-
+export type FishingRule = { id: string; title: string; summary: string; source_url: string | null; effective_from: string | null; effective_to: string | null };
+export type FishActivity = { id: string; month: number; activity_level: 'low' | 'medium' | 'high'; depth_note: string | null; method_note: string | null; bait_note: string | null; source_url: string | null; last_verified_at: string | null };
+export type FishDetail = { fish: Fish; methods: FishMethod[]; baits: FishBait[]; rules: FishingRule[]; waterBodies: WaterBody[]; activity: FishActivity[] };
 export type WaterBodyDistance = WaterBody & { distance_km?: number };
-
-export type WaterBodyDetail = {
-  waterBody: WaterBody;
-  fish: Fish[];
-};
+export type WaterBodyDetail = { waterBody: WaterBody; fish: Fish[] };
+export type FishingSpot = { id: string; water_body_id: string; name: string; description: string | null; latitude: number | null; longitude: number | null; access_notes: string | null; official_status: string | null; verification_level: string; verification_status: string; last_verified_at: string | null; spot_type: string | null };
+export type SpotSafetyNote = { id: string; spot_id: string; category: string; severity: 'low' | 'medium' | 'high'; note: string; last_verified_at: string | null };
+export type WeatherSnapshot = { id: string; spot_id: string | null; latitude: number | null; longitude: number | null; observed_at: string; source_url: string | null; wind_speed_ms: number | null; wind_direction_deg: number | null; wave_height_m: number | null; air_temp_c: number | null; water_temp_c: number | null; precipitation_probability: number | null };
+export type SpotReport = { id: string; spot_id: string; report_type: 'catch' | 'access' | 'closure' | 'hazard' | 'species' | 'update'; title: string | null; body: string; observed_at: string | null; status: string; created_at: string };
+export type TripPlan = { id: string; title: string; notes: string | null; planned_start: string | null; planned_end: string | null; status: 'draft' | 'planned' | 'completed' | 'cancelled'; created_at: string; updated_at: string };
