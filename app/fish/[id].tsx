@@ -9,25 +9,41 @@ export default function FishDetailScreen() {
   const router = useRouter();
   const [detail, setDetail] = useState<FishDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  useEffect(() => { if (id) getFishDetail(id).then(r => { setDetail(r.data); setLoading(false); }); }, [id]);
-  if (loading) return <SafeAreaView style={styles.center}><ActivityIndicator/><Text>Balık bilgileri yükleniyor...</Text></SafeAreaView>;
-  if (!detail) return <SafeAreaView style={styles.center}><Text>Balık kaydı bulunamadı.</Text><Pressable onPress={()=>router.back()}><Text style={styles.link}>Geri dön</Text></Pressable></SafeAreaView>;
-  const { fish, methods, baits, rules } = detail;
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    let active = true;
+    getFishDetail(id).then(result => {
+      if (!active) return;
+      setDetail(result.data);
+      setError(result.error ? 'Bazı bilgiler yüklenemedi.' : null);
+      setLoading(false);
+    });
+    return () => { active = false; };
+  }, [id]);
+
+  if (loading) return <SafeAreaView style={styles.center}><ActivityIndicator /><Text style={styles.muted}>Balık bilgileri yükleniyor...</Text></SafeAreaView>;
+  if (!detail) return <SafeAreaView style={styles.center}><Text>Balık kaydı bulunamadı.</Text><Pressable onPress={() => router.back()}><Text style={styles.link}>Geri dön</Text></Pressable></SafeAreaView>;
+
+  const { fish, methods, baits, rules, waterBodies } = detail;
   return <SafeAreaView style={styles.container}><ScrollView contentContainerStyle={styles.content}>
-    <Pressable onPress={()=>router.back()}><Text style={styles.back}>‹ Geri</Text></Pressable>
+    <Pressable onPress={() => router.back()}><Text style={styles.back}>‹ Geri</Text></Pressable>
     <Text style={styles.title}>{fish.common_name_tr}</Text>
     {fish.scientific_name ? <Text style={styles.scientific}>{fish.scientific_name}</Text> : null}
     {fish.description ? <Text style={styles.description}>{fish.description}</Text> : null}
-    <GuideSection title="Av yöntemleri">
-      {methods.length ? methods.map(x=><View key={x.id} style={styles.row}><Text style={styles.name}>{x.name}</Text>{x.description ? <Text style={styles.body}>{x.description}</Text>:null}{x.suitable_for?<Text style={styles.meta}>{x.suitable_for}</Text>:null}</View>) : <Text style={styles.muted}>Doğrulanmış yöntem kaydı henüz yok.</Text>}
+    {error ? <View style={styles.warning}><Text style={styles.warningText}>{error} Eksik bilgiler kesin bilgi olarak değerlendirilmemelidir.</Text></View> : null}
+
+    <GuideSection title="Yaşam alanı"><Text style={styles.body}>{fish.habitat || 'Habitat bilgisi henüz eklenmemiş.'}</Text></GuideSection>
+    <GuideSection title="Av yöntemleri">{methods.length ? methods.map(x => <View key={x.id} style={styles.row}><Text style={styles.name}>{x.name}</Text>{x.description ? <Text style={styles.body}>{x.description}</Text> : null}{x.suitable_for ? <Text style={styles.meta}>{x.suitable_for}</Text> : null}</View>) : <Text style={styles.muted}>Doğrulanmış yöntem kaydı henüz yok.</Text>}</GuideSection>
+    <GuideSection title="Yemler">{baits.length ? baits.map(x => <View key={x.id} style={styles.row}><Text style={styles.name}>{x.name}</Text>{x.description ? <Text style={styles.body}>{x.description}</Text> : null}{x.notes ? <Text style={styles.meta}>{x.notes}</Text> : null}</View>) : <Text style={styles.muted}>Doğrulanmış yem kaydı henüz yok.</Text>}</GuideSection>
+    <GuideSection title="Güncel kurallar">{rules.length ? rules.map(x => <View key={x.id} style={styles.row}><Text style={styles.name}>{x.title}</Text><Text style={styles.body}>{x.summary}</Text>{x.effective_from || x.effective_to ? <Text style={styles.meta}>Geçerlilik: {x.effective_from ?? '—'} → {x.effective_to ?? '—'}</Text> : null}{x.source_url ? <Text style={styles.source}>{x.source_url}</Text> : null}</View>) : <Text style={styles.muted}>Bu tür için doğrulanmış kural kaydı bulunmuyor. Güncel resmi mevzuat ayrıca kontrol edilmelidir.</Text>}</GuideSection>
+    <GuideSection title="Bu balığın bulunduğu sular">
+      {waterBodies.length ? waterBodies.map(w => <Pressable key={w.id} onPress={() => router.push(`/water-body/${w.id}`)} style={styles.waterRow}><View style={styles.waterText}><Text style={styles.name}>{w.name}</Text><Text style={styles.muted}>{[w.province, w.district].filter(Boolean).join(' • ')}</Text>{w.water_type ? <Text style={styles.meta}>{w.water_type}</Text> : null}</View><Text style={styles.arrow}>›</Text></Pressable>) : <Text style={styles.muted}>Henüz ilişkilendirilmiş su kaynağı bulunmuyor.</Text>}
     </GuideSection>
-    <GuideSection title="Yemler">
-      {baits.length ? baits.map(x=><View key={x.id} style={styles.row}><Text style={styles.name}>{x.name}</Text>{x.description?<Text style={styles.body}>{x.description}</Text>:null}{x.notes?<Text style={styles.meta}>{x.notes}</Text>:null}</View>) : <Text style={styles.muted}>Doğrulanmış yem kaydı henüz yok.</Text>}
-    </GuideSection>
-    <GuideSection title="Güncel kurallar">
-      {rules.length ? rules.map(x=><View key={x.id} style={styles.row}><Text style={styles.name}>{x.title}</Text><Text style={styles.body}>{x.summary}</Text>{x.effective_to?<Text style={styles.meta}>Geçerlilik sonu: {x.effective_to}</Text>:null}</View>) : <Text style={styles.muted}>Bu tür için doğrulanmış kural kaydı bulunmuyor. Güncel resmi mevzuat ayrıca kontrol edilmelidir.</Text>}
-    </GuideSection>
+    <Pressable style={styles.mapButton} onPress={() => router.push('/map')}><Text style={styles.mapButtonText}>Haritada su kaynaklarını aç</Text></Pressable>
   </ScrollView></SafeAreaView>;
 }
-function GuideSection({title,children}:{title:string;children:React.ReactNode}) { return <View style={styles.section}><Text style={styles.sectionTitle}>{title}</Text>{children}</View>; }
-const styles=StyleSheet.create({container:{flex:1,backgroundColor:'#f6f8f7'},content:{padding:18,paddingBottom:40},center:{flex:1,alignItems:'center',justifyContent:'center',gap:10},back:{fontWeight:'800',color:'#087f5b',marginBottom:14},title:{fontSize:30,fontWeight:'800',color:'#123b32'},scientific:{fontStyle:'italic',color:'#71817b',marginTop:3},description:{color:'#4f625b',lineHeight:21,marginTop:12},section:{backgroundColor:'#fff',borderRadius:16,padding:16,marginTop:14,borderWidth:1,borderColor:'#dbe5e1'},sectionTitle:{fontSize:19,fontWeight:'800',color:'#17352e',marginBottom:10},row:{paddingVertical:10,borderBottomWidth:1,borderBottomColor:'#edf2ef'},name:{fontSize:16,fontWeight:'800',color:'#17352e'},body:{color:'#4f625b',lineHeight:19,marginTop:4},meta:{color:'#087f5b',fontWeight:'600',marginTop:6},muted:{color:'#71817b'},link:{color:'#087f5b',fontWeight:'800'}});
+
+function GuideSection({ title, children }: { title: string; children: React.ReactNode }) { return <View style={styles.section}><Text style={styles.sectionTitle}>{title}</Text>{children}</View>; }
+const styles = StyleSheet.create({ container:{flex:1,backgroundColor:'#f6f8f7'}, content:{padding:18,paddingBottom:40}, center:{flex:1,alignItems:'center',justifyContent:'center',gap:10}, back:{fontWeight:'800',color:'#087f5b',marginBottom:14}, title:{fontSize:30,fontWeight:'800',color:'#123b32'}, scientific:{fontStyle:'italic',color:'#71817b',marginTop:3}, description:{color:'#4f625b',lineHeight:21,marginTop:12}, section:{backgroundColor:'#fff',borderRadius:16,padding:16,marginTop:14,borderWidth:1,borderColor:'#dbe5e1'}, sectionTitle:{fontSize:19,fontWeight:'800',color:'#17352e',marginBottom:10}, row:{paddingVertical:10,borderBottomWidth:1,borderBottomColor:'#edf2ef'}, waterRow:{paddingVertical:11,borderBottomWidth:1,borderBottomColor:'#edf2ef',flexDirection:'row',alignItems:'center',justifyContent:'space-between'}, waterText:{flex:1}, name:{fontSize:16,fontWeight:'800',color:'#17352e'}, body:{color:'#4f625b',lineHeight:19,marginTop:4}, meta:{color:'#087f5b',fontWeight:'600',marginTop:6}, muted:{color:'#71817b'}, link:{color:'#087f5b',fontWeight:'800'}, source:{fontSize:11,color:'#71817b',marginTop:6}, warning:{marginTop:14,backgroundColor:'#fff6df',borderRadius:12,padding:12,borderWidth:1,borderColor:'#ead7a0'}, warningText:{color:'#765c20',lineHeight:19}, arrow:{fontSize:28,color:'#087f5b',paddingLeft:10}, mapButton:{marginTop:14,backgroundColor:'#087f5b',borderRadius:14,padding:14,alignItems:'center'}, mapButtonText:{color:'#fff',fontWeight:'800'} });
