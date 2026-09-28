@@ -44,15 +44,17 @@ export async function getFishDetail(id: string) {
   const fishResult = await supabase.from('fish_species').select('id,common_name_tr,scientific_name,description,habitat').eq('id', id).maybeSingle();
   if (fishResult.error || !fishResult.data) return { data: null as FishDetail | null, error: fishResult.error ?? new Error('Balık kaydı bulunamadı') };
 
-  const [methodsResult, baitsResult, rulesResult] = await Promise.all([
+  const [methodsResult, baitsResult, rulesResult, watersResult] = await Promise.all([
     supabase.from('fish_species_methods').select('fishing_methods(id,name,description,suitable_for)').eq('fish_species_id', id),
     supabase.from('fish_species_baits').select('baits(id,name,description,notes)').eq('fish_species_id', id),
     supabase.from('fishing_rules').select('id,title,summary,source_url,effective_from,effective_to').eq('fish_species_id', id).order('effective_from', { ascending: false }),
+    supabase.from('water_body_fish').select('water_bodies(id,name,water_type,province,district,latitude,longitude,fishing_allowed,verification_level)').eq('fish_species_id', id),
   ]);
 
   const methods = (methodsResult.data ?? []).map((r: any) => r.fishing_methods).filter(Boolean);
   const baits = (baitsResult.data ?? []).map((r: any) => r.baits).filter(Boolean);
   const rules = rulesResult.data ?? [];
-  const error = methodsResult.error ?? baitsResult.error ?? rulesResult.error ?? null;
-  return { data: { fish: fishResult.data as Fish, methods, baits, rules }, error };
+  const waterBodies = (watersResult.data ?? []).map((r: any) => r.water_bodies).filter(Boolean) as WaterBody[];
+  const error = methodsResult.error ?? baitsResult.error ?? rulesResult.error ?? watersResult.error ?? null;
+  return { data: { fish: fishResult.data as Fish, methods, baits, rules, waterBodies }, error };
 }
