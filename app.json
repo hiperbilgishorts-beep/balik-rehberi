@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Balık Rehberi Türkiye",
+    "slug": "balik-rehberi",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "balikrehberi",
+    "userInterfaceStyle": "automatic",
+    "ios": { "supportsTablet": true, "bundleIdentifier": "tr.balikrehberi.app" },
+    "android": { "package": "tr.balikrehberi.app" },
+    "plugins": ["expo-router", "expo-location"],
+    "experiments": { "typedRoutes": true }
+  }
+}
