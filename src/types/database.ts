@@ -18,6 +18,19 @@ export type Fish = {
   habitat: string | null;
 };
 
+export type FishingMethod = { id: string; name: string; description: string | null };
+export type Bait = { id: string; name: string; description: string | null };
+export type FishMethod = FishingMethod & { suitable_for?: string | null };
+export type FishBait = Bait & { notes?: string | null };
+export type FishingRule = { id: string; title: string; summary: string; source_url: string | null; effective_from: string | null; effective_to: string | null };
+
+export type FishDetail = {
+  fish: Fish;
+  methods: FishMethod[];
+  baits: FishBait[];
+  rules: FishingRule[];
+};
+
 export type WaterBodyDistance = WaterBody & { distance_km?: number };
 
 export type WaterBodyDetail = {
