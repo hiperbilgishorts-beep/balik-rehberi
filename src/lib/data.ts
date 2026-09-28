@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabase';
-import type { Fish, WaterBody, WaterBodyDetail, WaterBodyDistance } from '../types/database';
+import type { Fish, FishDetail, WaterBody, WaterBodyDetail, WaterBodyDistance } from '../types/database';
 
 export async function getWaterBodies(filters?: { province?: string; district?: string; search?: string }) {
   if (!supabase) return { data: [] as WaterBody[], error: new Error('Supabase yapılandırılmamış') };
@@ -12,8 +12,7 @@ export async function getWaterBodies(filters?: { province?: string; district?: s
 }
 
 export function sortByDistance(items: WaterBody[], latitude: number, longitude: number): WaterBodyDistance[] {
-  const r = 6371;
-  const radians = (v: number) => v * Math.PI / 180;
+  const r = 6371; const radians = (v: number) => v * Math.PI / 180;
   return items.map(item => {
     if (item.latitude == null || item.longitude == null) return { ...item, distance_km: undefined };
     const dLat = radians(Number(item.latitude) - latitude), dLon = radians(Number(item.longitude) - longitude);
@@ -38,4 +37,22 @@ export async function getWaterBodyDetail(id: string) {
   if (relation.error) return { data: { waterBody: water.data as WaterBody, fish: [] }, error: relation.error };
   const fish = (relation.data ?? []).map((row: any) => row.fish_species).filter(Boolean) as Fish[];
   return { data: { waterBody: water.data as WaterBody, fish }, error: null };
+}
+
+export async function getFishDetail(id: string) {
+  if (!supabase) return { data: null as FishDetail | null, error: new Error('Supabase yapılandırılmamış') };
+  const fishResult = await supabase.from('fish_species').select('id,common_name_tr,scientific_name,description,habitat').eq('id', id).maybeSingle();
+  if (fishResult.error || !fishResult.data) return { data: null as FishDetail | null, error: fishResult.error ?? new Error('Balık kaydı bulunamadı') };
+
+  const [methodsResult, baitsResult, rulesResult] = await Promise.all([
+    supabase.from('fish_species_methods').select('fishing_methods(id,name,description,suitable_for)').eq('fish_species_id', id),
+    supabase.from('fish_species_baits').select('baits(id,name,description,notes)').eq('fish_species_id', id),
+    supabase.from('fishing_rules').select('id,title,summary,source_url,effective_from,effective_to').eq('fish_species_id', id).order('effective_from', { ascending: false }),
+  ]);
+
+  const methods = (methodsResult.data ?? []).map((r: any) => r.fishing_methods).filter(Boolean);
+  const baits = (baitsResult.data ?? []).map((r: any) => r.baits).filter(Boolean);
+  const rules = rulesResult.data ?? [];
+  const error = methodsResult.error ?? baitsResult.error ?? rulesResult.error ?? null;
+  return { data: { fish: fishResult.data as Fish, methods, baits, rules }, error };
 }
