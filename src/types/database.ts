@@ -29,6 +29,7 @@ export type FishDetail = {
   methods: FishMethod[];
   baits: FishBait[];
   rules: FishingRule[];
+  waterBodies: WaterBody[];
 };
 
 export type WaterBodyDistance = WaterBody & { distance_km?: number };
