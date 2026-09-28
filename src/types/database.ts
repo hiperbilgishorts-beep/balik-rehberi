@@ -19,10 +19,17 @@ export type Fish = {
 };
 
 export type FishingMethod = { id: string; name: string; description: string | null };
-export type Bait = { id: string; name: string; description: string | null };
+export type Bait = { id: string; name: string; description: string | null; notes?: string | null };
 export type FishMethod = FishingMethod & { suitable_for?: string | null };
-export type FishBait = Bait & { notes?: string | null };
-export type FishingRule = { id: string; title: string; summary: string; source_url: string | null; effective_from: string | null; effective_to: string | null };
+export type FishBait = Bait;
+export type FishingRule = {
+  id: string;
+  title: string;
+  summary: string;
+  source_url: string | null;
+  effective_from: string | null;
+  effective_to: string | null;
+};
 
 export type FishDetail = {
   fish: Fish;
