@@ -6,47 +6,19 @@ import { MapPreview } from '../src/components/MapPreview';
 import { getWaterBodies, sortByDistance } from '../src/lib/data';
 import type { WaterBody } from '../src/types/database';
 
-export default function MapScreen() {
-  const router = useRouter();
-  const [items, setItems] = useState<WaterBody[]>([]);
-  const [query, setQuery] = useState('');
-  const [province, setProvince] = useState('');
-  const [nearest, setNearest] = useState(false);
-  const [position, setPosition] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [selected, setSelected] = useState<WaterBody | null>(null);
-
-  useEffect(() => {
-    getWaterBodies().then(r => setItems(r.data));
-    (async () => {
-      const p = await Location.requestForegroundPermissionsAsync();
-      if (p.status === 'granted') {
-        const c = await Location.getCurrentPositionAsync({});
-        setPosition({ latitude: c.coords.latitude, longitude: c.coords.longitude });
-      }
-    })();
-  }, []);
-
-  const provinces = useMemo(() => Array.from(new Set(items.map(x => x.province).filter(Boolean))).sort(), [items]);
-  const filtered = useMemo(() => {
-    const q = query.trim().toLocaleLowerCase('tr-TR');
-    const result = items.filter(x => (!q || `${x.name} ${x.province || ''} ${x.district || ''}`.toLocaleLowerCase('tr-TR').includes(q)) && (!province || x.province === province));
-    return nearest && position ? sortByDistance(result, position.latitude, position.longitude) : result;
-  }, [items, query, province, nearest, position]);
-  const openDetail = (item: WaterBody) => router.push({ pathname: '/water-body/[id]', params: { id: item.id } });
-
-  return <SafeAreaView style={styles.container}>
-    <Text style={styles.title}>Balık Noktaları</Text>
-    <TextInput value={query} onChangeText={setQuery} placeholder="Göl, baraj, akarsu veya ilçe ara..." style={styles.search} />
-    <View style={styles.actions}>
-      <Pressable style={[styles.button, nearest && styles.active]} onPress={() => setNearest(v => !v)}><Text style={styles.buttonText}>📍 En yakınım</Text></Pressable>
-      <Pressable style={styles.button} onPress={() => setProvince('')}><Text style={styles.buttonText}>Türkiye</Text></Pressable>
-    </View>
-    <FlatList horizontal showsHorizontalScrollIndicator={false} data={provinces} keyExtractor={x => x} style={styles.provinces} renderItem={({ item }) => <Pressable onPress={() => setProvince(item)} style={[styles.chip, province === item && styles.chipActive]}><Text>{item}</Text></Pressable>} />
-    <MapPreview items={filtered} onSelect={openDetail} />
-    {selected ? <View style={styles.selectedCard}><Text style={styles.selectedTitle}>{selected.name}</Text><Text style={styles.meta}>{[selected.province, selected.district].filter(Boolean).join(' • ')}</Text><Pressable onPress={() => openDetail(selected)}><Text style={styles.open}>Detayları aç →</Text></Pressable></View> : null}
-    <Text style={styles.count}>{filtered.length} sonuç</Text>
-    <FlatList data={filtered.slice(0, 100)} keyExtractor={x => x.id} renderItem={({ item }) => <Pressable onPress={() => openDetail(item)} style={styles.row}><Text style={styles.name}>{item.name}</Text><Text style={styles.meta}>{[item.province, item.district].filter(Boolean).join(' • ')}</Text></Pressable>} />
-  </SafeAreaView>;
+export default function MapScreen(){
+ const router=useRouter();const[items,setItems]=useState<WaterBody[]>([]);const[query,setQuery]=useState('');const[province,setProvince]=useState('');const[waterType,setWaterType]=useState('');const[confidence,setConfidence]=useState('');const[nearest,setNearest]=useState(false);const[position,setPosition]=useState<{latitude:number;longitude:number}|null>(null);
+ useEffect(()=>{getWaterBodies().then(r=>setItems(r.data));(async()=>{const p=await Location.requestForegroundPermissionsAsync();if(p.status==='granted'){const c=await Location.getCurrentPositionAsync({});setPosition({latitude:c.coords.latitude,longitude:c.coords.longitude})}})()},[]);
+ const provinces=useMemo(()=>Array.from(new Set(items.map(x=>x.province).filter(Boolean))).sort(),[items]);const waterTypes=useMemo(()=>Array.from(new Set(items.map(x=>x.water_type).filter(Boolean))).sort(),[items]);const confidenceLevels=useMemo(()=>Array.from(new Set(items.map(x=>x.verification_level).filter(Boolean))).sort(),[items]);
+ const filtered=useMemo(()=>{const q=query.trim().toLocaleLowerCase('tr-TR');const result=items.filter(x=>(!q||`${x.name} ${x.province||''} ${x.district||''}`.toLocaleLowerCase('tr-TR').includes(q))&&(!province||x.province===province)&&(!waterType||x.water_type===waterType)&&(!confidence||x.verification_level===confidence));return nearest&&position?sortByDistance(result,position.latitude,position.longitude):result},[items,query,province,waterType,confidence,nearest,position]);
+ const openDetail=(item:WaterBody)=>router.push({pathname:'/water-body/[id]',params:{id:item.id}});
+ return <SafeAreaView style={styles.container}><Text style={styles.title}>Balık Noktaları</Text><Text style={styles.subtitle}>Konum, su türü ve veri güvenini birlikte filtrele.</Text><TextInput value={query} onChangeText={setQuery} placeholder="Göl, baraj, akarsu veya ilçe ara..." style={styles.search}/>
+  <View style={styles.actions}><Pressable style={[styles.button,nearest&&styles.active]} onPress={()=>setNearest(v=>!v)}><Text style={styles.buttonText}>📍 En yakınım</Text></Pressable><Pressable style={styles.button} onPress={()=>{setProvince('');setWaterType('');setConfidence('')}}><Text style={styles.buttonText}>Filtreleri temizle</Text></Pressable></View>
+  <Text style={styles.filterTitle}>Su türü</Text><FlatList horizontal showsHorizontalScrollIndicator={false} data={waterTypes} keyExtractor={x=>x} renderItem={({item})=><Pressable onPress={()=>setWaterType(waterType===item?'':item)} style={[styles.chip,waterType===item&&styles.chipActive]}><Text>{item}</Text></Pressable>}/>
+  <Text style={styles.filterTitle}>Doğrulama</Text><FlatList horizontal showsHorizontalScrollIndicator={false} data={confidenceLevels} keyExtractor={x=>x} renderItem={({item})=><Pressable onPress={()=>setConfidence(confidence===item?'':item)} style={[styles.chip,confidence===item&&styles.chipActive]}><Text>{item}</Text></Pressable>}/>
+  <FlatList horizontal showsHorizontalScrollIndicator={false} data={provinces} keyExtractor={x=>x} style={styles.provinces} renderItem={({item})=><Pressable onPress={()=>setProvince(province===item?'':item)} style={[styles.chip,province===item&&styles.chipActive]}><Text>{item}</Text></Pressable>}/>
+  <MapPreview items={filtered} onSelect={openDetail}/><Text style={styles.count}>{filtered.length} sonuç</Text>
+  <FlatList data={filtered.slice(0,100)} keyExtractor={x=>x.id} renderItem={({item})=><Pressable onPress={()=>openDetail(item)} style={styles.row}><View style={styles.rowMain}><Text style={styles.name}>{item.name}</Text><Text style={styles.meta}>{[item.province,item.district,item.water_type].filter(Boolean).join(' • ')}</Text><Text style={styles.quality}>Güven: {item.verification_level||'belirsiz'} · Erişim: {item.access_level||'kontrol edilmeli'}</Text></View><Text style={styles.chevron}>›</Text></Pressable>}/>
+ </SafeAreaView>;
 }
-
-const styles = StyleSheet.create({ container:{flex:1,backgroundColor:'#f6f8f7',padding:16}, title:{fontSize:28,fontWeight:'800',color:'#123b32',marginTop:12}, search:{backgroundColor:'#fff',borderRadius:12,padding:13,marginTop:12,borderWidth:1,borderColor:'#dbe5e1'}, actions:{flexDirection:'row',gap:8,marginTop:10}, button:{backgroundColor:'#fff',borderRadius:10,paddingVertical:10,paddingHorizontal:13}, active:{backgroundColor:'#dcece7'}, buttonText:{fontWeight:'700'}, provinces:{marginTop:10,maxHeight:42}, chip:{backgroundColor:'#fff',paddingHorizontal:12,paddingVertical:9,borderRadius:18,marginRight:7}, chipActive:{backgroundColor:'#bfe4d7'}, selectedCard:{backgroundColor:'#fff',borderRadius:14,padding:14,marginTop:10,borderWidth:1,borderColor:'#d7e4df'}, selectedTitle:{fontSize:18,fontWeight:'800',color:'#123b32'}, open:{marginTop:10,fontWeight:'800',color:'#087f5b'}, count:{marginVertical:8,fontWeight:'800',color:'#087f5b'}, row:{backgroundColor:'#fff',borderRadius:12,padding:13,marginBottom:8}, name:{fontWeight:'700',fontSize:15,color:'#17352e'}, meta:{fontSize:12,color:'#71817b',marginTop:3} });
+const styles=StyleSheet.create({container:{flex:1,backgroundColor:'#f6f8f7',padding:16},title:{fontSize:28,fontWeight:'800',color:'#123b32',marginTop:12},subtitle:{fontSize:13,color:'#61706b',marginTop:3},search:{backgroundColor:'#fff',borderRadius:12,padding:13,marginTop:12,borderWidth:1,borderColor:'#dbe5e1'},actions:{flexDirection:'row',gap:8,marginTop:10},button:{backgroundColor:'#fff',borderRadius:10,paddingVertical:10,paddingHorizontal:13},active:{backgroundColor:'#dcece7'},buttonText:{fontWeight:'700'},filterTitle:{fontSize:12,fontWeight:'800',color:'#61706b',marginTop:9,marginBottom:5},provinces:{marginTop:6,maxHeight:42},chip:{backgroundColor:'#fff',paddingHorizontal:12,paddingVertical:9,borderRadius:18,marginRight:7},chipActive:{backgroundColor:'#bfe4d7'},count:{marginVertical:8,fontWeight:'800',color:'#087f5b'},row:{backgroundColor:'#fff',borderRadius:12,padding:13,marginBottom:8,flexDirection:'row',alignItems:'center'},rowMain:{flex:1},name:{fontWeight:'700',fontSize:15,color:'#17352e'},meta:{fontSize:12,color:'#71817b',marginTop:3},quality:{fontSize:11,color:'#087f5b',marginTop:5},chevron:{fontSize:28,color:'#9aa7a2'}});
