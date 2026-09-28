@@ -1,6 +1,17 @@
 import { supabase } from '../config/supabase';
 import type { Fish, FishDetail, WaterBody, WaterBodyDetail, WaterBodyDistance } from '../types/database';
 
+let regulationSyncPromise: Promise<unknown> | null = null;
+
+export async function syncFishingRules() {
+  if (!supabase) return { ok: false, error: new Error('Supabase yapılandırılmamış') };
+  if (regulationSyncPromise) return regulationSyncPromise;
+  regulationSyncPromise = supabase.functions.invoke('sync-fishing-rules', { body: { reason: 'app_connection' } })
+    .then(({ data, error }) => ({ ok: !error && data?.ok !== false, data, error }))
+    .finally(() => { regulationSyncPromise = null; });
+  return regulationSyncPromise;
+}
+
 export async function getWaterBodies(filters?: { province?: string; district?: string; search?: string }) {
   if (!supabase) return { data: [] as WaterBody[], error: new Error('Supabase yapılandırılmamış') };
   let query = supabase.from('water_bodies').select('id,name,water_type,province,district,latitude,longitude,fishing_allowed,verification_level').order('name');
