@@ -4,35 +4,20 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getWaterBodyDetail } from '../../src/lib/data';
 import type { WaterBodyDetail } from '../../src/types/database';
 
-export default function WaterBodyDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
-  const [detail, setDetail] = useState<WaterBodyDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!id) { setLoading(false); setError('Su kaynağı kimliği bulunamadı.'); return; }
-    getWaterBodyDetail(id).then(result => { setDetail(result.data); setError(result.error?.message ?? null); setLoading(false); });
-  }, [id]);
-
-  if (loading) return <SafeAreaView style={styles.center}><ActivityIndicator /><Text style={styles.muted}>Su kaynağı bilgileri yükleniyor...</Text></SafeAreaView>;
-  if (!detail) return <SafeAreaView style={styles.center}><Text>{error ?? 'Su kaynağı bulunamadı.'}</Text><Pressable onPress={() => router.back()}><Text style={styles.link}>Geri dön</Text></Pressable></SafeAreaView>;
-
-  return <SafeAreaView style={styles.container}><ScrollView contentContainerStyle={styles.content}>
-    <Pressable onPress={() => router.back()}><Text style={styles.back}>‹ Geri</Text></Pressable>
-    <Text style={styles.title}>{detail.waterBody.name}</Text>
-    <Text style={styles.location}>{[detail.waterBody.province, detail.waterBody.district].filter(Boolean).join(' • ') || 'Konum bilgisi yok'}</Text>
-    <View style={styles.badge}><Text style={styles.badgeText}>{detail.waterBody.water_type || 'Su kaynağı'}</Text></View>
-
-    <View style={styles.card}><Text style={styles.section}>Avlanma durumu</Text><Text style={styles.status}>{detail.waterBody.fishing_allowed === false ? '⛔ Avlanmaya izin verilmiyor' : detail.waterBody.fishing_allowed === true ? '🎣 Avlanma bilgisi mevcut' : '⚠️ Güncel mevzuat ayrıca kontrol edilmeli'}</Text>{detail.waterBody.verification_level ? <Text style={styles.muted}>Veri doğrulaması: {detail.waterBody.verification_level}</Text> : null}</View>
-
-    <View style={styles.card}><Text style={styles.section}>Bu suda bulunan balıklar</Text>{detail.fish.length === 0 ? <Text style={styles.muted}>Henüz doğrulanmış tür kaydı bulunmuyor.</Text> : detail.fish.map(fish => <Pressable key={fish.id} onPress={() => router.push(`/fish/${fish.id}`)} style={styles.fishRow}><Text style={styles.fishName}>{fish.common_name_tr}</Text>{fish.scientific_name ? <Text style={styles.scientific}>{fish.scientific_name}</Text> : null}{fish.habitat ? <Text style={styles.muted}>{fish.habitat}</Text> : null}<Text style={styles.open}>Balık detayını aç ›</Text></Pressable>)}</View>
-
-    <View style={styles.card}><Text style={styles.section}>Konum</Text>{detail.waterBody.latitude != null && detail.waterBody.longitude != null ? <><Text style={styles.muted}>{Number(detail.waterBody.latitude).toFixed(5)}, {Number(detail.waterBody.longitude).toFixed(5)}</Text><Pressable style={styles.mapButton} onPress={() => router.push('/map')}><Text style={styles.mapButtonText}>Haritada göster ›</Text></Pressable></> : <Text style={styles.muted}>Koordinat bilgisi bulunmuyor.</Text>}</View>
-
-    <View style={styles.card}><Text style={styles.section}>Bilgi notu</Text><Text style={styles.muted}>Avlanma kuralları ve yasaklar zamanla değişebilir. Bu ekrandaki izin durumu doğrulanmamışsa güncel resmi mevzuat ayrıca kontrol edilmelidir.</Text></View>
-  </ScrollView></SafeAreaView>;
+export default function WaterBodyDetailScreen(){
+ const {id}=useLocalSearchParams<{id:string}>();const router=useRouter();const[detail,setDetail]=useState<WaterBodyDetail|null>(null);const[loading,setLoading]=useState(true);const[error,setError]=useState<string|null>(null);
+ useEffect(()=>{if(!id){setLoading(false);setError('Su kaynağı kimliği bulunamadı.');return}getWaterBodyDetail(id).then(r=>{setDetail(r.data);setError(r.error?.message??null);setLoading(false)})},[id]);
+ if(loading)return <SafeAreaView style={styles.center}><ActivityIndicator/><Text style={styles.muted}>Su kaynağı bilgileri yükleniyor...</Text></SafeAreaView>;
+ if(!detail)return <SafeAreaView style={styles.center}><Text>{error??'Su kaynağı bulunamadı.'}</Text><Pressable onPress={()=>router.back()}><Text style={styles.link}>Geri dön</Text></Pressable></SafeAreaView>;
+ const w=detail.waterBody;
+ return <SafeAreaView style={styles.container}><ScrollView contentContainerStyle={styles.content}>
+  <Pressable onPress={()=>router.back()}><Text style={styles.back}>‹ Geri</Text></Pressable><Text style={styles.title}>{w.name}</Text><Text style={styles.location}>{[w.province,w.district].filter(Boolean).join(' • ')||'Konum bilgisi yok'}</Text><View style={styles.badge}><Text style={styles.badgeText}>{w.water_type||'Su kaynağı'}</Text></View>
+  <View style={styles.card}><Text style={styles.section}>Güven ve erişim</Text><View style={styles.grid}><Info label="Doğrulama" value={w.verification_level||'Belirtilmemiş'}/><Info label="Konum hassasiyeti" value={w.location_precision||'Belirtilmemiş'}/><Info label="Erişim" value={w.access_level||'Kontrol edilmeli'}/><Info label="Son kontrol" value={w.last_verified_at?new Date(w.last_verified_at).toLocaleDateString('tr-TR'):'Belirtilmemiş'}/></View>{w.verification_notes?<Text style={styles.muted}>{w.verification_notes}</Text>:null}{w.source_url?<Text style={styles.source}>Kaynak: {w.source_url}</Text>:null}</View>
+  <View style={styles.card}><Text style={styles.section}>Avlanma durumu</Text><Text style={styles.status}>{w.fishing_allowed===false?'⛔ Avlanmaya izin verilmiyor':w.fishing_allowed===true?'🎣 Avlanma bilgisi mevcut':'⚠️ Güncel mevzuat ayrıca kontrol edilmeli'}</Text><Text style={styles.muted}>Bu alan izin bilgisini gösterir; güncel il ve tür kuralları ayrıca kontrol edilmelidir.</Text></View>
+  <View style={styles.card}><Text style={styles.section}>Bu suda bulunan balıklar</Text>{detail.fish.length===0?<Text style={styles.muted}>Henüz doğrulanmış tür kaydı bulunmuyor.</Text>:detail.fish.map(f=><Pressable key={f.id} onPress={()=>router.push(`/fish/${f.id}`)} style={styles.fishRow}><Text style={styles.fishName}>{f.common_name_tr}</Text>{f.scientific_name?<Text style={styles.scientific}>{f.scientific_name}</Text>:null}<Text style={styles.open}>Balık detayını aç ›</Text></Pressable>)}</View>
+  <View style={styles.card}><Text style={styles.section}>Konum</Text>{w.latitude!=null&&w.longitude!=null?<><Text style={styles.muted}>{Number(w.latitude).toFixed(5)}, {Number(w.longitude).toFixed(5)}</Text><Pressable style={styles.mapButton} onPress={()=>router.push('/map')}><Text style={styles.mapButtonText}>Haritada göster ›</Text></Pressable></>:<Text style={styles.muted}>Koordinat bilgisi bulunmuyor.</Text>}</View>
+  <View style={styles.card}><Text style={styles.section}>Bilgi notu</Text><Text style={styles.muted}>Rota bilgisi ile yasal izin aynı şey değildir. Erişim, özel mülkiyet, saha tabelaları ve güncel av kuralları hareket öncesinde doğrulanmalıdır.</Text></View>
+ </ScrollView></SafeAreaView>;
 }
-
-const styles=StyleSheet.create({container:{flex:1,backgroundColor:'#f6f8f7'},content:{padding:18,paddingBottom:40},center:{flex:1,alignItems:'center',justifyContent:'center',gap:10},back:{fontWeight:'800',color:'#087f5b',marginBottom:14},title:{fontSize:28,fontWeight:'800',color:'#123b32'},location:{marginTop:5,color:'#71817b'},badge:{alignSelf:'flex-start',backgroundColor:'#dcece7',paddingHorizontal:12,paddingVertical:7,borderRadius:16,marginTop:12},badgeText:{fontWeight:'700',color:'#125744'},card:{backgroundColor:'#fff',borderRadius:16,padding:16,marginTop:14,borderWidth:1,borderColor:'#dbe5e1'},section:{fontSize:18,fontWeight:'800',color:'#17352e',marginBottom:10},status:{fontWeight:'700',color:'#276b58',marginBottom:7},fishRow:{paddingVertical:11,borderBottomWidth:1,borderBottomColor:'#edf2ef'},fishName:{fontSize:16,fontWeight:'800',color:'#17352e'},scientific:{fontStyle:'italic',color:'#71817b',marginTop:2},muted:{color:'#71817b',lineHeight:19},open:{color:'#087f5b',fontWeight:'800',marginTop:7},mapButton:{marginTop:12,backgroundColor:'#dcece7',paddingVertical:11,borderRadius:10,alignItems:'center'},mapButtonText:{fontWeight:'800',color:'#125744'},link:{color:'#087f5b',fontWeight:'800',marginTop:10}});
+function Info({label,value}:{label:string;value:string}){return <View style={styles.info}><Text style={styles.infoLabel}>{label}</Text><Text style={styles.infoValue}>{value}</Text></View>}
+const styles=StyleSheet.create({container:{flex:1,backgroundColor:'#f6f8f7'},content:{padding:18,paddingBottom:40},center:{flex:1,alignItems:'center',justifyContent:'center',gap:10},back:{fontWeight:'800',color:'#087f5b',marginBottom:14},title:{fontSize:28,fontWeight:'800',color:'#123b32'},location:{marginTop:5,color:'#71817b'},badge:{alignSelf:'flex-start',backgroundColor:'#dcece7',paddingHorizontal:12,paddingVertical:7,borderRadius:16,marginTop:12},badgeText:{fontWeight:'700',color:'#125744'},card:{backgroundColor:'#fff',borderRadius:16,padding:16,marginTop:14,borderWidth:1,borderColor:'#dbe5e1'},section:{fontSize:18,fontWeight:'800',color:'#17352e',marginBottom:10},grid:{flexDirection:'row',flexWrap:'wrap',gap:10},info:{width:'47%',backgroundColor:'#f6f8f7',borderRadius:10,padding:10},infoLabel:{fontSize:11,color:'#71817b'},infoValue:{fontWeight:'800',color:'#17352e',marginTop:4},status:{fontWeight:'700',color:'#276b58',marginBottom:7},fishRow:{paddingVertical:11,borderBottomWidth:1,borderBottomColor:'#edf2ef'},fishName:{fontSize:16,fontWeight:'800',color:'#17352e'},scientific:{fontStyle:'italic',color:'#71817b',marginTop:2},muted:{color:'#71817b',lineHeight:19},open:{color:'#087f5b',fontWeight:'800',marginTop:7},mapButton:{marginTop:12,backgroundColor:'#dcece7',paddingVertical:11,borderRadius:10,alignItems:'center'},mapButtonText:{fontWeight:'800',color:'#125744'},source:{fontSize:11,color:'#71817b',marginTop:8},link:{color:'#087f5b',fontWeight:'800',marginTop:10}});
