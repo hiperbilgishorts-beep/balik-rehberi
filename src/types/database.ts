@@ -8,6 +8,11 @@ export type WaterBody = {
   longitude: number | null;
   fishing_allowed: boolean | null;
   verification_level: string | null;
+  access_level?: string | null;
+  location_precision?: string | null;
+  source_url?: string | null;
+  last_verified_at?: string | null;
+  verification_notes?: string | null;
 };
 
 export type Fish = {
@@ -31,12 +36,24 @@ export type FishingRule = {
   effective_to: string | null;
 };
 
+export type FishActivity = {
+  id: string;
+  month: number;
+  activity_level: 'low' | 'medium' | 'high';
+  depth_note: string | null;
+  method_note: string | null;
+  bait_note: string | null;
+  source_url: string | null;
+  last_verified_at: string | null;
+};
+
 export type FishDetail = {
   fish: Fish;
   methods: FishMethod[];
   baits: FishBait[];
   rules: FishingRule[];
   waterBodies: WaterBody[];
+  activity: FishActivity[];
 };
 
 export type WaterBodyDistance = WaterBody & { distance_km?: number };
