@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabase';
-import type { Fish, FishDetail, WaterBody, WaterBodyDetail, WaterBodyDistance } from '../types/database';
+import type { Fish, FishActivity, FishDetail, WaterBody, WaterBodyDetail, WaterBodyDistance } from '../types/database';
 
 let regulationSyncPromise: Promise<unknown> | null = null;
 
@@ -12,9 +12,11 @@ export async function syncFishingRules() {
   return regulationSyncPromise;
 }
 
+const waterSelect = 'id,name,water_type,province,district,latitude,longitude,fishing_allowed,verification_level,access_level,location_precision,source_url,last_verified_at,verification_notes';
+
 export async function getWaterBodies(filters?: { province?: string; district?: string; search?: string }) {
   if (!supabase) return { data: [] as WaterBody[], error: new Error('Supabase yapılandırılmamış') };
-  let query = supabase.from('water_bodies').select('id,name,water_type,province,district,latitude,longitude,fishing_allowed,verification_level').order('name');
+  let query = supabase.from('water_bodies').select(waterSelect).order('name');
   if (filters?.province) query = query.eq('province', filters.province);
   if (filters?.district) query = query.eq('district', filters.district);
   if (filters?.search) query = query.or(`name.ilike.%${filters.search}%,province.ilike.%${filters.search}%,district.ilike.%${filters.search}%`);
@@ -42,7 +44,7 @@ export async function getFish(search?: string) {
 
 export async function getWaterBodyDetail(id: string) {
   if (!supabase) return { data: null as WaterBodyDetail | null, error: new Error('Supabase yapılandırılmamış') };
-  const water = await supabase.from('water_bodies').select('id,name,water_type,province,district,latitude,longitude,fishing_allowed,verification_level').eq('id', id).maybeSingle();
+  const water = await supabase.from('water_bodies').select(waterSelect).eq('id', id).maybeSingle();
   if (water.error || !water.data) return { data: null as WaterBodyDetail | null, error: water.error ?? new Error('Su kaynağı bulunamadı') };
   const relation = await supabase.from('fish_water_bodies').select('fish_species(id,common_name_tr,scientific_name,description,habitat)').eq('water_body_id', id);
   if (relation.error) return { data: { waterBody: water.data as WaterBody, fish: [] }, error: relation.error };
@@ -55,24 +57,19 @@ export async function getFishDetail(id: string) {
   const fishResult = await supabase.from('fish_species').select('id,common_name_tr,scientific_name,description,habitat').eq('id', id).maybeSingle();
   if (fishResult.error || !fishResult.data) return { data: null as FishDetail | null, error: fishResult.error ?? new Error('Balık kaydı bulunamadı') };
 
-  const [methodsResult, baitsResult, rulesResult, watersResult] = await Promise.all([
+  const [methodsResult, baitsResult, rulesResult, watersResult, activityResult] = await Promise.all([
     supabase.from('fish_methods').select('fishing_methods(id,name,description)').eq('fish_id', id),
     supabase.from('fish_baits').select('baits(id,name,description,notes)').eq('fish_id', id),
     supabase.from('fishing_rules').select('id,regulation_name,source_reference,closed_start,closed_end,valid_from,valid_to,status,notes').eq('fish_id', id).order('valid_from', { ascending: false }),
-    supabase.from('fish_water_bodies').select('water_bodies(id,name,water_type,province,district,latitude,longitude,fishing_allowed,verification_level)').eq('fish_id', id),
+    supabase.from('fish_water_bodies').select(`water_bodies(${waterSelect})`).eq('fish_id', id),
+    supabase.from('fish_activity_calendar').select('id,month,activity_level,depth_note,method_note,bait_note,source_url,last_verified_at').eq('fish_id', id).order('month'),
   ]);
 
   const methods = (methodsResult.data ?? []).map((r: any) => r.fishing_methods ? ({ ...r.fishing_methods, suitable_for: r.suitability ?? null }) : null).filter(Boolean);
   const baits = (baitsResult.data ?? []).map((r: any) => r.baits).filter(Boolean);
-  const rules = (rulesResult.data ?? []).map((r: any) => ({
-    id: r.id,
-    title: r.regulation_name,
-    summary: [r.status, r.notes].filter(Boolean).join(' — '),
-    source_url: r.source_reference ?? null,
-    effective_from: r.closed_start ?? r.valid_from ?? null,
-    effective_to: r.closed_end ?? r.valid_to ?? null,
-  }));
+  const rules = (rulesResult.data ?? []).map((r: any) => ({ id: r.id, title: r.regulation_name, summary: [r.status, r.notes].filter(Boolean).join(' — '), source_url: r.source_reference ?? null, effective_from: r.closed_start ?? r.valid_from ?? null, effective_to: r.closed_end ?? r.valid_to ?? null }));
   const waterBodies = (watersResult.data ?? []).map((r: any) => r.water_bodies).filter(Boolean) as WaterBody[];
-  const error = methodsResult.error ?? baitsResult.error ?? rulesResult.error ?? watersResult.error ?? null;
-  return { data: { fish: fishResult.data as Fish, methods, baits, rules, waterBodies }, error };
+  const activity = (activityResult.data ?? []) as FishActivity[];
+  const error = methodsResult.error ?? baitsResult.error ?? rulesResult.error ?? watersResult.error ?? activityResult.error ?? null;
+  return { data: { fish: fishResult.data as Fish, methods, baits, rules, waterBodies, activity }, error };
 }
