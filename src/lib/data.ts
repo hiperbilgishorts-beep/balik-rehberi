@@ -12,10 +12,9 @@ export async function syncFishingRules() {
   return regulationSyncPromise;
 }
 
-// Keep this select aligned with the live normalized Supabase schema.
-// Province and district names are joined from their lookup tables; legal permission is
-// deliberately not inferred from a water-body row.
-const waterSelect = 'id,name,normalized_name,water_type,province_id,district_id,latitude,longitude,basin_name,description,source_id,verification_level,verification_status,last_verified_at,source_checked_at,source_reference,fishing_relevance,fishing_relevance_confidence,provinces(name),districts(name)';
+// This select mirrors the normalized production schema. Related labels and source
+// metadata come from foreign-key tables; permission is never inferred from a water body.
+const waterSelect = 'id,name,normalized_name,water_type,province_id,district_id,latitude,longitude,basin_name,description,source_id,verification_level,verification_status,last_verified_at,source_checked_at,source_reference,fishing_relevance,fishing_relevance_confidence,provinces(name),districts(name),sources(name,url,verification_status)';
 
 function mapWaterBody(row: any): WaterBody {
   return {
@@ -26,13 +25,14 @@ function mapWaterBody(row: any): WaterBody {
     district: row.districts?.name ?? null,
     latitude: row.latitude == null ? null : Number(row.latitude),
     longitude: row.longitude == null ? null : Number(row.longitude),
-    // Permission and access are not fields on water_bodies. Do not fabricate them.
     fishing_allowed: null,
     verification_level: row.verification_level ?? null,
     verification_status: row.verification_status ?? null,
     access_level: null,
     location_precision: null,
-    source_url: row.source_reference ?? null,
+    source_url: row.source_reference ?? row.sources?.url ?? null,
+    source_name: row.sources?.name ?? null,
+    source_status: row.sources?.verification_status ?? null,
     last_verified_at: row.last_verified_at ?? row.source_checked_at ?? null,
     verification_notes: row.description ?? null,
     source_id: row.source_id ?? null,
@@ -99,7 +99,7 @@ export async function getWaterBodyDetail(id: string) {
 export async function getFishDetail(id: string) {
   if (!supabase) return { data: null as FishDetail | null, error: new Error('Supabase yapılandırılmamış') };
   const fishResult = await supabase.from('fish_species')
-    .select('id,common_name_tr,scientific_name,description,habitat')
+    .select('id,common_name_tr,scientific_name,description,habitat,source_id,source_reference,verification_level,verification_status,sources(name,url,verification_status)')
     .eq('id', id).maybeSingle();
   if (fishResult.error || !fishResult.data) {
     return { data: null as FishDetail | null, error: fishResult.error ?? new Error('Balık kaydı bulunamadı') };
@@ -112,20 +112,21 @@ export async function getFishDetail(id: string) {
       .select('id,regulation_name,source_reference,closed_start,closed_end,valid_from,valid_to,status,notes,minimum_length_cm,daily_count_limit,daily_limit_kg,area_restriction,prohibited_methods,allowed_methods')
       .eq('fish_id', id).order('valid_from', { ascending: false }),
     supabase.from('fish_water_bodies').select(`water_bodies(${waterSelect})`).eq('fish_id', id),
-    // The live schema stores seasonal activity in fish_seasons, not fish_activity_calendar.
     supabase.from('fish_seasons').select('id,month,activity_level,notes,preferred_water_conditions,sources(url)').eq('fish_id', id).order('month'),
   ]);
 
+  const rawFish: any = fishResult.data;
+  const fish: Fish = {
+    ...rawFish,
+    source_name: rawFish.sources?.name ?? null,
+    source_url: rawFish.sources?.url ?? null,
+    source_status: rawFish.sources?.verification_status ?? null,
+  };
   const methods = (methodsResult.data ?? []).map((r: any) => r.fishing_methods ? ({
-    ...r.fishing_methods,
-    suitable_for: r.suitability ?? null,
-    notes: r.notes ?? null,
+    ...r.fishing_methods, suitable_for: r.suitability ?? null, notes: r.notes ?? null,
   }) : null).filter(Boolean);
   const baits = (baitsResult.data ?? []).map((r: any) => r.baits ? ({
-    ...r.baits,
-    notes: r.notes ?? null,
-    suitability: r.suitability ?? null,
-    effectiveness: r.effectiveness ?? null,
+    ...r.baits, notes: r.notes ?? null, suitability: r.suitability ?? null, effectiveness: r.effectiveness ?? null,
   }) : null).filter(Boolean);
   const rules = (rulesResult.data ?? []).map((r: any) => ({
     id: r.id,
@@ -143,14 +144,10 @@ export async function getFishDetail(id: string) {
   }));
   const waterBodies = (watersResult.data ?? []).map((r: any) => r.water_bodies ? mapWaterBody(r.water_bodies) : null).filter(Boolean) as WaterBody[];
   const activity = (activityResult.data ?? []).map((r: any) => ({
-    id: r.id,
-    month: Number(r.month),
-    activity_level: r.activity_level,
-    notes: r.notes ?? null,
-    preferred_water_conditions: r.preferred_water_conditions ?? null,
-    source_url: r.sources?.url ?? null,
-    last_verified_at: null,
+    id: r.id, month: Number(r.month), activity_level: r.activity_level,
+    notes: r.notes ?? null, preferred_water_conditions: r.preferred_water_conditions ?? null,
+    source_url: r.sources?.url ?? null, last_verified_at: null,
   })) as FishActivity[];
   const error = methodsResult.error ?? baitsResult.error ?? rulesResult.error ?? watersResult.error ?? activityResult.error ?? null;
-  return { data: { fish: fishResult.data as Fish, methods, baits, rules, waterBodies, activity }, error };
+  return { data: { fish, methods, baits, rules, waterBodies, activity }, error };
 }
