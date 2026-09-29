@@ -21,14 +21,19 @@ export function MapPreview({ items, initialRegion, onSelect }: Props) {
             key={item.id}
             coordinate={{ latitude: Number(item.latitude), longitude: Number(item.longitude) }}
             title={item.name}
-            description={[item.province, item.district].filter(Boolean).join(' • ')}
+            description={[item.province, item.district, 'Konum erişim noktası olarak doğrulanmamış olabilir'].filter(Boolean).join(' • ')}
             onPress={() => onSelect?.(item)}
           />
         ))}
       </MapView>
       {validItems.length === 0 && (
         <View style={styles.empty} pointerEvents="none">
-          <Text style={styles.emptyText}>Koordinatı doğrulanmış su kaynağı bulunamadı.</Text>
+          <Text style={styles.emptyText}>Koordinatı kayıtlı su kaynağı bulunamadı.</Text>
+        </View>
+      )}
+      {validItems.length > 0 && (
+        <View style={styles.note} pointerEvents="none">
+          <Text style={styles.noteText}>Harita koordinatları kıyı girişi veya güvenli erişim noktası garantisi değildir.</Text>
         </View>
       )}
     </View>
@@ -39,4 +44,6 @@ const styles = StyleSheet.create({
   container: { height: 260, borderRadius: 18, overflow: 'hidden', backgroundColor: '#dcece7' },
   empty: { position: 'absolute', left: 20, right: 20, bottom: 18, padding: 10, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.92)' },
   emptyText: { textAlign: 'center', color: '#31544b', fontWeight: '600' },
+  note: { position: 'absolute', left: 8, right: 8, top: 8, padding: 8, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.92)' },
+  noteText: { textAlign: 'center', color: '#765c20', fontSize: 11, fontWeight: '600' },
 });
