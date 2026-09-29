@@ -14,6 +14,8 @@ export type WaterBody = {
   source_url?: string | null;
   source_name?: string | null;
   source_status?: string | null;
+  source_reference?: string | null;
+  description?: string | null;
   last_verified_at?: string | null;
   verification_notes?: string | null;
   source_id?: string | null;
