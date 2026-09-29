@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Alert, Linking, Platform } from 'react-native';
 import { getWaterBodyDetail } from '../../src/lib/data';
 import type { WaterBodyDetail } from '../../src/types/database';
 
@@ -18,7 +17,7 @@ export default function WaterBodyDetailScreen(){
    }
    const lat = Number(w.latitude), lon = Number(w.longitude);
    const label = encodeURIComponent(w.name);
-   const google = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&destination_place_id=`;
+   const google = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
    const yandex = `https://yandex.com/maps/?rtext=~${lat},${lon}&rtt=auto`;
    const apple = `https://maps.apple.com/?daddr=${lat},${lon}&q=${label}`;
    const geo = Platform.OS === 'android' ? `geo:${lat},${lon}?q=${lat},${lon}(${label})` : apple;
