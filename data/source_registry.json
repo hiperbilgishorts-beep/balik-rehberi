@@ -1,26 +1,39 @@
 {
-  "version": 1,
+  "version": 2,
   "policy": {
     "legal": "official_first",
     "biology": "scientific_first",
     "location": "cross_check",
     "bait_method": "secondary_allowed_with_provenance",
     "community_reports": "never_auto_publish",
-    "conflict_rule": "keep_conflicting_claims_and_escalate_for_review"
+    "conflict_rule": "keep_conflicting_claims_and_escalate_for_review",
+    "secondary_source_rule": "never infer legal permission or confirmed species occurrence from an angling guide alone",
+    "weather_rule": "forecast must be labeled as forecast and retain observation/forecast time",
+    "taxonomy_rule": "store scientific name, source and synonym resolution separately from Turkish common name"
   },
   "sources": [
-    {"key":"tarim_orman_amator","name":"Tarım ve Orman Bakanlığı","kind":"official","priority":100,"uses":["regulation","closed_season","minimum_size","daily_limit","area_restriction"]},
-    {"key":"resmi_gazete","name":"Resmî Gazete","kind":"official","priority":100,"uses":["regulation","legal_text","effective_dates"]},
-    {"key":"dsi","name":"Devlet Su İşleri Genel Müdürlüğü","kind":"official","priority":95,"uses":["water_body","dam","reservoir","river","coordinates"]},
-    {"key":"il_tarim","name":"İl Tarım ve Orman Müdürlükleri","kind":"official","priority":95,"uses":["local_regulation","stocking","local_closure","water_body"]},
-    {"key":"fishbase","name":"FishBase","kind":"scientific","priority":90,"uses":["taxonomy","biology","habitat","distribution"]},
-    {"key":"oltaatlasi","name":"Olta Atlası","kind":"secondary","priority":65,"uses":["fishing_spot","reported_species","method","bait","access_notes","navigation","editorial_guidance"]},
-    {"key":"balikrotasi","name":"Balık Rotası","kind":"secondary","priority":60,"uses":["species_guide","seasonal_activity","method","bait","community_features"]}
+    {"key":"tarim_orman_bsgm","name":"Tarım ve Orman Bakanlığı - Balıkçılık ve Su Ürünleri Genel Müdürlüğü","kind":"official","priority":100,"url":"https://www.tarimorman.gov.tr/BSGM","uses":["regulation","closed_season","minimum_size","daily_limit","local_restriction","official_notices"]},
+    {"key":"resmi_gazete","name":"Resmî Gazete","kind":"official","priority":100,"url":"https://www.resmigazete.gov.tr/","uses":["legal_text","effective_dates","amendments"]},
+    {"key":"dsi","name":"Devlet Su İşleri Genel Müdürlüğü","kind":"official","priority":95,"url":"https://www.dsi.gov.tr/","uses":["reservoir","dam","lake","river","water_infrastructure"]},
+    {"key":"il_tarim","name":"İl Tarım ve Orman Müdürlükleri","kind":"official","priority":95,"url":"https://www.tarimorman.gov.tr/","uses":["local_regulation","stocking","local_closure","official_spot_notices"]},
+    {"key":"tagem_su_urunleri","name":"TAGEM Su Ürünleri Araştırma Enstitüleri","kind":"official","priority":92,"url":"https://arastirma.tarimorman.gov.tr/elazigsuurunleri/","uses":["turkish_freshwater_research","stocking","species_research"]},
+    {"key":"fishbase","name":"FishBase","kind":"scientific","priority":90,"url":"https://www.fishbase.se/","uses":["taxonomy","biology","habitat","distribution","feeding"]},
+    {"key":"fao_fisheries","name":"FAO Fisheries and Aquaculture","kind":"scientific","priority":90,"url":"https://www.fao.org/fishery/en","uses":["fisheries_science","species","habitat","management"]},
+    {"key":"gbif","name":"Global Biodiversity Information Facility","kind":"scientific","priority":88,"url":"https://www.gbif.org/","uses":["occurrence_records","distribution","taxonomy"]},
+    {"key":"iucn_red_list","name":"IUCN Red List of Threatened Species","kind":"scientific","priority":88,"url":"https://www.iucnredlist.org/","uses":["conservation_status","threats","distribution"]},
+    {"key":"catalogue_of_life","name":"Catalogue of Life","kind":"scientific","priority":85,"url":"https://www.catalogueoflife.org/","uses":["taxonomy","accepted_names","synonyms"]},
+    {"key":"worms","name":"World Register of Marine Species","kind":"scientific","priority":85,"url":"https://www.marinespecies.org/","uses":["marine_taxonomy","marine_synonyms"]},
+    {"key":"copernicus_marine","name":"Copernicus Marine Service","kind":"scientific","priority":85,"url":"https://marine.copernicus.eu/","uses":["marine_conditions","sea_surface_temperature","waves","currents"]},
+    {"key":"open_meteo","name":"Open-Meteo Weather API","kind":"scientific","priority":80,"url":"https://open-meteo.com/en/docs","uses":["forecast","wind","precipitation","air_temperature"]},
+    {"key":"openstreetmap","name":"OpenStreetMap","kind":"secondary","priority":70,"url":"https://www.openstreetmap.org/copyright","uses":["base_map","roads","geographic_context"]},
+    {"key":"oltaatlasi","name":"Olta Atlası","kind":"secondary","priority":65,"url":"https://oltaatlasi.com/","uses":["fishing_spot","reported_species","method","bait","access_notes","navigation"]},
+    {"key":"balikrotasi","name":"Balık Rotası","kind":"secondary","priority":60,"url":"https://balikrotasi.com/map","uses":["species_guide","seasonal_activity","method","bait","community_feature"]}
   ],
   "validation": {
     "spot": "A/B/C/D confidence must retain source and verification timestamp",
     "species_water_relation": "secondary report cannot override official prohibition",
     "regulation": "only official sources can mark a rule as legally authoritative",
-    "biology": "scientific source preferred; secondary source remains attributed"
+    "biology": "scientific source preferred; secondary source remains attributed",
+    "ingestion": "all imported rows must retain source key, source URL, accessed time and review status"
   }
 }
