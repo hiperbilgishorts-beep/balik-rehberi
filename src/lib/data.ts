@@ -12,11 +12,10 @@ export async function syncFishingRules() {
   return regulationSyncPromise;
 }
 
-// This select mirrors the normalized production schema. Related labels and source
-// metadata come from foreign-key tables; permission is never inferred from a water body.
 const waterSelect = 'id,name,normalized_name,water_type,province_id,district_id,latitude,longitude,basin_name,description,source_id,verification_level,verification_status,last_verified_at,source_checked_at,source_reference,fishing_relevance,fishing_relevance_confidence,provinces(name),districts(name),sources(name,url,verification_status)';
 
 function mapWaterBody(row: any): WaterBody {
+  const sourceReference = row.source_reference ?? null;
   return {
     id: row.id,
     name: row.name,
@@ -30,11 +29,13 @@ function mapWaterBody(row: any): WaterBody {
     verification_status: row.verification_status ?? null,
     access_level: null,
     location_precision: null,
-    source_url: row.source_reference ?? row.sources?.url ?? null,
+    source_url: row.sources?.url ?? (typeof sourceReference === 'string' && /^https?:\/\//i.test(sourceReference) ? sourceReference : null),
     source_name: row.sources?.name ?? null,
     source_status: row.sources?.verification_status ?? null,
+    source_reference: sourceReference,
+    description: row.description ?? null,
     last_verified_at: row.last_verified_at ?? row.source_checked_at ?? null,
-    verification_notes: row.description ?? null,
+    verification_notes: null,
     source_id: row.source_id ?? null,
     basin_name: row.basin_name ?? null,
     fishing_relevance: row.fishing_relevance ?? null,
