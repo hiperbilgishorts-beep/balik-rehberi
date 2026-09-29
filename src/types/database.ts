@@ -12,6 +12,8 @@ export type WaterBody = {
   access_level?: string | null;
   location_precision?: string | null;
   source_url?: string | null;
+  source_name?: string | null;
+  source_status?: string | null;
   last_verified_at?: string | null;
   verification_notes?: string | null;
   source_id?: string | null;
@@ -19,21 +21,26 @@ export type WaterBody = {
   fishing_relevance?: string | null;
   fishing_relevance_confidence?: string | null;
 };
-export type Fish = { id: string; common_name_tr: string; scientific_name: string | null; description: string | null; habitat: string | null };
+export type Fish = {
+  id: string;
+  common_name_tr: string;
+  scientific_name: string | null;
+  description: string | null;
+  habitat: string | null;
+  source_id?: string | null;
+  source_reference?: string | null;
+  source_name?: string | null;
+  source_url?: string | null;
+  source_status?: string | null;
+  verification_level?: string | null;
+  verification_status?: string | null;
+};
 export type FishingMethod = { id: string; name: string; description: string | null; notes?: string | null };
 export type Bait = { id: string; name: string; description: string | null; notes?: string | null; bait_type?: string | null; suitability?: string | null; effectiveness?: string | null };
 export type FishMethod = FishingMethod & { suitable_for?: string | null };
 export type FishBait = Bait;
 export type FishingRule = { id: string; title: string; summary: string; source_url: string | null; effective_from: string | null; effective_to: string | null };
-export type FishActivity = {
-  id: string;
-  month: number;
-  activity_level: 'low' | 'medium' | 'high' | string;
-  notes: string | null;
-  preferred_water_conditions: string | null;
-  source_url: string | null;
-  last_verified_at: string | null;
-};
+export type FishActivity = { id: string; month: number; activity_level: 'low' | 'medium' | 'high' | string; notes: string | null; preferred_water_conditions: string | null; source_url: string | null; last_verified_at: string | null };
 export type FishDetail = { fish: Fish; methods: FishMethod[]; baits: FishBait[]; rules: FishingRule[]; waterBodies: WaterBody[]; activity: FishActivity[] };
 export type WaterBodyDistance = WaterBody & { distance_km?: number };
 export type WaterBodyDetail = { waterBody: WaterBody; fish: Fish[] };
