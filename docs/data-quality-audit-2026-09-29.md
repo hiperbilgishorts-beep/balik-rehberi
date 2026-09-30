@@ -1,20 +1,20 @@
 # Balık Rehberi — Veri Kalitesi Denetimi
 
-**Denetim tarihi:** 2026-09-29  
+**Denetim tarihi:** 2026-09-30  
 **Kaynak:** Canlı Supabase veritabanı `uilplrllepuyofmdxqox`. Bu rapor şema ve kayıt metaverisi denetimidir; Google Maps/Yandex Maps üzerinde yapılmış gerçek eşleşme doğrulaması değildir.
 
 ## Su kaynakları (1.695 kayıt)
 
 | Kontrol | Sonuç | Yorum |
 |---|---:|---|
-| Baraj / rezervuar | 1.396 | Tamamında ilçe ve koordinat eksik |
-| Gölet | 294 | Tamamında ilçe ve koordinat eksik |
-| Doğal göl | 5 | 4 kayıtta ilçe eksik; tamamında koordinat eksik |
-| Koordinatı eksik | 1.695 / 1.695 | Harita üzerinde kesin konum ve yakınlık hesabı henüz yapılamaz |
-| `source_id` eksik | 1.673 / 1.695 | Kaynağın normalleştirilmiş kaynak tablosuna bağlantısı yok |
-| `source_reference` eksik | 18 / 1.695 | Kaynak referansı alanı doldurulmalı veya doğrulanmalı |
+| Baraj / rezervuar | 1.396 | 790 koordinatlı; 606 koordinat bekliyor |
+| Gölet | 294 | 128 koordinatlı; 166 koordinat bekliyor |
+| Doğal göl | 5 | 5 koordinatlı; ilçe alanları ayrıca tamamlanmalı |
+| Koordinatı eksik | 772 / 1.695 (45,5%) | 923 kayıt koordinatlıdır (%54,5); koordinatlı olmak erişim veya av izni kanıtı değildir |
+| `source_id` eksik | 38 / 1.695 | Kaynağın normalleştirilmiş kaynak tablosuna bağlantısı yok |
+| `source_reference` eksik | 10 / 1.695 | Kaynak referansı alanı doldurulmalı veya doğrulanmalı |
 | Balıkçılık uygunluğu bilinmiyor | 1.668 / 1.695 | Kaydın varlığı, balıkçılığa uygunluğu kanıtlamaz |
-| Tekrarlanan `normalized_name` grupları | 11 | Otomatik silme yapılmadı |
+| Tekrarlanan `normalized_name` grupları | 11 | 13 fazla kayıt; otomatik silme yapılmadı |
 | Fazladan tekrar kaydı | 13 | İsimler farklı illerde aynı gerçek suyu ifade edebileceğinden elle/kanıtla çözülmeli |
 
 ### Tespit edilen yinelenen adlar
@@ -54,4 +54,13 @@ Bu gruplar **silinmedi veya birleştirilmedi**. Özellikle Beyşehir Gölü gibi
 
 ## Harita uygulamasına yönlendirme
 
-Su kaynağı ayrıntı ekranına Google Maps, Yandex Maps ve cihazın varsayılan harita uygulamasında yol tarifi açma seçenekleri eklendi. Bu seçenekler yalnızca koordinat mevcutsa çalışır. Şu an 1.695 kaydın hiçbirinde koordinat olmadığından düğme bilerek açıklayıcı bir eksik-veri mesajı gösterir.
+Su kaynağı ayrıntı ekranında Google Maps, Yandex Maps ve cihazın varsayılan harita uygulamasını açma seçenekleri bulunur. Bu seçenekler yalnızca koordinat mevcutsa çalışır. Güncel denetimde 923 kayıt koordinatlı, 772 kayıt koordinatsızdır; her pin genel su konumunu gösterir ve kıyıya erişim veya avlanma izni anlamına gelmez.
+
+## Güncel kapsam özeti (2026-09-30)
+
+- Koordinat kapsamı: **923 / 1.695 (%54,5)**.
+- Eksik koordinatlar: **606 baraj/rezervuar + 166 gölet = 772 kayıt**.
+- Koordinatı olan kayıtların 894'ünde `source_id`, 923'ünde kaynak referansı ve 923'ünde koordinat güven derecesi vardır.
+- Kaynak ataması bulunmayan koordinatlı kayıtlar ayrıca denetlenmelidir; koordinat sayısı tek başına veri kalitesi puanı değildir.
+- Olta Atlası mera kataloğunda 1.448 kayıt listelenmiştir (64 B, 231 C, 1.153 D). Bu kaynak listelerindeki kayıtlar genel konum/rota rehberi olarak tutulur; kaynak sayfası açık koordinat vermiyorsa su kaynağı koordinatı olarak kopyalanmaz.
+- Son hedefli OSM/Photon kontrol grubunda ad + il + su türü birlikte uyuşan yeni koordinat bulunmadı. Eşleşmeyen adaylar veritabanına koordinat olarak yazılmadı.
