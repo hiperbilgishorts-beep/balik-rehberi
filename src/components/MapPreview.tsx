@@ -21,7 +21,7 @@ export function MapPreview({ items, initialRegion, onSelect }: Props) {
             key={item.id}
             coordinate={{ latitude: Number(item.latitude), longitude: Number(item.longitude) }}
             title={item.name}
-            description={[item.province, item.district, 'Konum erişim noktası olarak doğrulanmamış olabilir'].filter(Boolean).join(' • ')}
+            description={[item.province, 'Konum erişim noktası olarak doğrulanmamış olabilir'].filter(Boolean).join(' • ')}
             onPress={() => onSelect?.(item)}
           />
         ))}
