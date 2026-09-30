@@ -76,7 +76,7 @@ export async function getFishingAreas(search?: string) {
   const rows: FishingArea[] = [];
   for (let from = 0; ; from += pageSize) {
     const { data, error } = await supabase.from('fishing_areas')
-      .select('id,source_slug,name,province_name,district_name,zone_name,water_type,source_grade,location_confidence_grade,source_url,source_name,general_note,coordinates_imported,source_checked_at')
+      .select('id,source_slug,name,province_name,district_name,zone_name,water_type,source_grade,location_confidence_grade,source_url,source_name,general_note,coordinates_imported,latitude,longitude,coordinate_status,coordinate_note,source_checked_at')
       .order('name')
       .range(from, from + pageSize - 1);
     if (error) return { data: rows, error };
