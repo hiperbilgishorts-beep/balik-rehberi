@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { supabase } from '../../src/config/supabase';
+import { getWaterBodyDetail } from '../../src/lib/data';
 import type { WaterBody } from '../../src/types/database';
 
 export default function WaterDetail() {
   const { id } = useLocalSearchParams<{id:string}>();
   const [item, setItem] = useState<WaterBody | null>(null);
-  useEffect(() => { if (!supabase || !id) return; supabase.from('water_bodies').select('id,name,water_type,province,latitude,longitude,fishing_allowed,verification_level').eq('id',id).maybeSingle().then(r=>setItem(r.data as WaterBody | null)); }, [id]);
+  useEffect(() => { if (!id) return; getWaterBodyDetail(id).then(r => setItem(r.data?.waterBody ?? null)); }, [id]);
   if (!item) return <SafeAreaView style={styles.center}><Text style={styles.loading}>Su kaynağı yükleniyor...</Text></SafeAreaView>;
   return <SafeAreaView style={styles.container}><ScrollView contentContainerStyle={{paddingBottom:40}}><Text style={styles.title}>{item.name}</Text><Text style={styles.subtitle}>{[item.province,item.water_type].filter(Boolean).join(' • ')}</Text><View style={styles.status}><Text style={styles.statusTitle}>Av durumu</Text><Text style={styles.statusText}>{item.fishing_allowed === true ? 'Avlanma bilgisi mevcut: izinli' : item.fishing_allowed === false ? 'Avlanma bilgisi mevcut: yasak' : 'Bu su kaynağı için av durumu henüz doğrulanmadı.'}</Text></View><View style={styles.card}><Text style={styles.heading}>Konum</Text><Text style={styles.body}>{item.latitude != null && item.longitude != null ? `${item.latitude}, ${item.longitude}` : 'Koordinat henüz doğrulanmadı.'}</Text><Text style={styles.heading}>Veri doğrulaması</Text><Text style={styles.body}>{item.verification_level ?? 'Belirtilmemiş'}</Text></View><View style={styles.card}><Text style={styles.heading}>Balık türleri</Text><Text style={styles.body}>Bu su kaynağına doğrulanmış tür ilişkileri veritabanından burada gösterilecek.</Text></View><View style={styles.card}><Text style={styles.heading}>Av kuralları</Text><Text style={styles.body}>Mevsim, boy limiti, günlük limit ve yasak dönemleri güncel mevzuat verilerinden gösterilecek.</Text></View></ScrollView></SafeAreaView>;
 }
