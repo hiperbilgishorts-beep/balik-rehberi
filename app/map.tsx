@@ -10,7 +10,7 @@ export default function MapScreen(){
  const router=useRouter();const[items,setItems]=useState<WaterBody[]>([]);const[query,setQuery]=useState('');const[province,setProvince]=useState('');const[waterType,setWaterType]=useState('');const[confidence,setConfidence]=useState('');const[nearest,setNearest]=useState(false);const[position,setPosition]=useState<{latitude:number;longitude:number}|null>(null);
  useEffect(()=>{getWaterBodies().then(r=>setItems(r.data))},[]);
  const hasCoordinates=useMemo(()=>items.some(x=>x.latitude!=null&&x.longitude!=null),[items]);
- const provinces=useMemo(()=>Array.from(new Set(items.map(x=>x.province).filter(Boolean))).sort(),[items]);const waterTypes=useMemo(()=>Array.from(new Set(items.map(x=>x.water_type).filter(Boolean))).sort(),[items]);const confidenceLevels=useMemo(()=>Array.from(new Set(items.map(x=>x.verification_level).filter(Boolean))).sort(),[items]);
+ const provinces=useMemo(()=>Array.from(new Set(items.map(x=>x.province).filter((x): x is string => Boolean(x)))).sort(),[items]);const waterTypes=useMemo(()=>Array.from(new Set(items.map(x=>x.water_type).filter((x): x is string => Boolean(x)))).sort(),[items]);const confidenceLevels=useMemo(()=>Array.from(new Set(items.map(x=>x.verification_level).filter((x): x is string => Boolean(x)))).sort(),[items]);
  const toggleNearest=async()=>{
    if(nearest){setNearest(false);return}
    if(!hasCoordinates){Alert.alert('Konum verisi henüz hazır değil','Su kaynakları kayıtlarında henüz koordinat bulunmadığı için yakınlık filtresi şu anda kullanılamıyor.');return}
