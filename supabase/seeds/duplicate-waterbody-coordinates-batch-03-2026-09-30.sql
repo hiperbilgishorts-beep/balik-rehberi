@@ -25,6 +25,12 @@ where target.id = p.missing_id
   and target.latitude is null
   and target.longitude is null;
 
+with pairs(missing_id, source_row_id) as (
+  values
+    ('65128432-e836-4b57-90f0-71e64323a872'::uuid, '1506669f-7156-48e7-80e8-bc099cb9aac9'::uuid),
+    ('2a6bfb12-fcbf-4b66-8ac0-3a21dfb5d17f'::uuid, '0b39bebc-12be-4d67-97a8-e8d866755a99'::uuid),
+    ('e69fb492-a797-4914-b0a3-f47331787910'::uuid, '74ed6842-9d16-4fa1-9f17-c85b2b216193'::uuid)
+)
 insert into public.water_body_location_checks
   (water_body_id, provider, status, candidate_name, candidate_latitude, candidate_longitude, match_confidence, evidence_url, checked_at, reviewer_notes)
 select p.missing_id, lc.provider, lc.status, lc.candidate_name, lc.candidate_latitude, lc.candidate_longitude,
