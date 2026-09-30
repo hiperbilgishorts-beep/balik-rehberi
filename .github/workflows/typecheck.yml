@@ -17,8 +17,6 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Align native dependencies with Expo SDK
-        run: npx expo install --fix
       - name: Type-check app
         run: npm run typecheck
       - name: Validate Android JavaScript bundle
