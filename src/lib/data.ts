@@ -12,7 +12,7 @@ export async function syncFishingRules() {
   return regulationSyncPromise;
 }
 
-const waterSelect = 'id,name,normalized_name,water_type,province_id,district_id,latitude,longitude,basin_name,description,source_id,verification_level,verification_status,last_verified_at,source_checked_at,source_reference,fishing_relevance,fishing_relevance_confidence,provinces(name),districts(name),sources(name,url,verification_status)';
+const waterSelect = 'id,name,normalized_name,water_type,province_id,district_id,latitude,longitude,basin_name,description,source_id,verification_level,verification_status,last_verified_at,source_checked_at,source_reference,fishing_relevance,fishing_relevance_confidence,coordinate_confidence_grade,coordinate_confidence_note,community_confidence_grade,provinces(name),districts(name),sources(name,url,verification_status)';
 
 function mapWaterBody(row: any): WaterBody {
   const sourceReference = row.source_reference ?? null;
@@ -40,6 +40,9 @@ function mapWaterBody(row: any): WaterBody {
     basin_name: row.basin_name ?? null,
     fishing_relevance: row.fishing_relevance ?? null,
     fishing_relevance_confidence: row.fishing_relevance_confidence ?? null,
+    coordinate_confidence_grade: row.coordinate_confidence_grade ?? 'F',
+    coordinate_confidence_note: row.coordinate_confidence_note ?? null,
+    community_confidence_grade: row.community_confidence_grade ?? 'F',
   };
 }
 
@@ -65,6 +68,24 @@ export async function getWaterBodies(filters?: { province?: string; district?: s
       .filter(Boolean).some(value => String(value).toLocaleLowerCase('tr-TR').includes(q)))
   );
   return { data, error: null };
+}
+
+export async function getFishingAreas(search?: string) {
+  if (!supabase) return { data: [] as FishingArea[], error: new Error('Supabase yapılandırılmamış') };
+  const pageSize = 500;
+  const rows: FishingArea[] = [];
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase.from('fishing_areas')
+      .select('id,source_slug,name,province_name,district_name,zone_name,water_type,source_grade,location_confidence_grade,source_url,source_name,general_note,coordinates_imported,source_checked_at')
+      .order('name')
+      .range(from, from + pageSize - 1);
+    if (error) return { data: rows, error };
+    rows.push(...((data ?? []) as FishingArea[]));
+    if (!data || data.length < pageSize) break;
+  }
+  const q = search?.trim().toLocaleLowerCase('tr-TR');
+  return { data: rows.filter(item => !q || [item.name,item.province_name,item.district_name,item.zone_name,item.water_type]
+    .filter(Boolean).some(value => String(value).toLocaleLowerCase('tr-TR').includes(q))), error: null };
 }
 
 export function sortByDistance(items: WaterBody[], latitude: number, longitude: number): WaterBodyDistance[] {
