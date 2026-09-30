@@ -41,7 +41,7 @@ export default function MeralarScreen() {
   const searchedItems = items.filter(item => !q || [item.name, item.province, item.district, item.basin_name]
     .filter(Boolean).some(value => String(value).toLocaleLowerCase('tr-TR').includes(q)));
   const filtered = searchedItems.filter(item => filter === 'all' || item.water_type === filter);
-  const areaTypes = Array.from(new Set(areas.map(item => item.water_type).filter((value): value is string => Boolean(value)))
+  const areaTypes = Array.from(new Set(areas.map(item => item.water_type).filter((value): value is string => Boolean(value))) )
     .sort((a, b) => a.localeCompare(b, 'tr-TR'));
   const filteredAreas = areas.filter(item => (!q || [item.name, item.province_name, item.district_name, item.zone_name, item.water_type]
     .filter(Boolean).some(value => String(value).toLocaleLowerCase('tr-TR').includes(q))) && (!areaType || item.water_type === areaType));
