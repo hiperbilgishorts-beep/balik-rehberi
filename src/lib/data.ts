@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabase';
-import type { Fish, FishActivity, FishDetail, WaterBody, WaterBodyDetail, WaterBodyDistance } from '../types/database';
+import type { Fish, FishActivity, FishDetail, FishingArea, WaterBody, WaterBodyDetail, WaterBodyDistance } from '../types/database';
 
 let regulationSyncPromise: Promise<unknown> | null = null;
 
