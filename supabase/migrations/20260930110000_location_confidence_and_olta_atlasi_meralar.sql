@@ -77,6 +77,7 @@ CREATE POLICY location_feedback_update_own ON public.water_body_location_feedbac
   FOR UPDATE TO authenticated USING (user_id = (SELECT auth.uid()))
   WITH CHECK (user_id = (SELECT auth.uid()));
 GRANT SELECT, INSERT, UPDATE ON public.water_body_location_feedback TO authenticated;
+CREATE INDEX IF NOT EXISTS idx_water_body_location_feedback_user_id ON public.water_body_location_feedback(user_id);
 
 CREATE TABLE IF NOT EXISTS public.water_body_feedback_summary (
   water_body_id uuid PRIMARY KEY REFERENCES public.water_bodies(id) ON DELETE CASCADE,
