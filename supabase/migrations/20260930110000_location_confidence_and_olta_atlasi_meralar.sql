@@ -133,7 +133,7 @@ AS $$
   WHERE f.water_body_id=p_water_body_id
 $$;
 REVOKE ALL ON FUNCTION public.get_water_body_location_feedback_summary(uuid) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.get_water_body_location_feedback_summary(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_water_body_location_feedback_summary(uuid) TO anon, authenticated;
 
 INSERT INTO public.sources(name,organization,url,source_type,verification_status,notes,source_scope)
 SELECT 'Olta Atlası - Meralar Arşivi','Olta Atlası','https://oltaatlasi.com/meralar/','secondary','pending',
