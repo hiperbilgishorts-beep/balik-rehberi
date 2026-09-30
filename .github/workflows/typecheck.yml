@@ -23,10 +23,10 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Verify real Supabase REST connection
-        if: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL != '' && (secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY != '' || secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY != '') }}
+        if: ${{ env.EXPO_PUBLIC_SUPABASE_URL != '' && (env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY != '' || env.EXPO_PUBLIC_SUPABASE_ANON_KEY != '') }}
         run: npm run verify:supabase
       - name: Note missing Supabase CI variables
-        if: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL == '' || (secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY == '' && secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY == '') }}
+        if: ${{ env.EXPO_PUBLIC_SUPABASE_URL == '' || (env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY == '' && env.EXPO_PUBLIC_SUPABASE_ANON_KEY == '') }}
         run: echo "::warning::Supabase CI secrets are not configured; Android compilation will run, but the app's runtime connection must be verified after setting repository secrets."
       - name: Type-check app
         run: npm run typecheck
