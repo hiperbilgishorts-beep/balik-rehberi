@@ -13,5 +13,7 @@ where source_id is null
     external_source_id ilike 'dsi-2024-dam-%'
     or external_source_id ilike 'dsi-2024-pond-%'
     or external_source_id ilike 'DSI-reservoir-%'
+    or external_source_id ilike 'dsi-2024-baraj-%'
+    or external_source_id ilike 'DSI-BARAJ-%'
   )
   and water_type in ('reservoir', 'pond');
