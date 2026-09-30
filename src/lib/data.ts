@@ -1,7 +1,7 @@
 import { supabase } from '../config/supabase';
 import type { Fish, FishActivity, FishDetail, FishingArea, WaterBody, WaterBodyDetail, WaterBodyDistance } from '../types/database';
 
-const waterSelect = 'id,name,normalized_name,water_type,province_id,district_id,latitude,longitude,basin_name,description,source_id,verification_level,verification_status,last_verified_at,source_checked_at,source_reference,fishing_relevance,fishing_relevance_confidence,coordinate_confidence_grade,coordinate_confidence_note,community_confidence_grade,provinces(name),districts(name),sources(name,url,verification_status)';
+const waterSelect = 'id,name,normalized_name,water_type,province_id,latitude,longitude,basin_name,description,source_id,verification_level,verification_status,last_verified_at,source_checked_at,source_reference,fishing_relevance,fishing_relevance_confidence,coordinate_confidence_grade,coordinate_confidence_note,community_confidence_grade,provinces(name),sources(name,url,verification_status)';
 
 function mapWaterBody(row: any): WaterBody {
   const sourceReference = row.source_reference ?? null;
@@ -10,8 +10,7 @@ function mapWaterBody(row: any): WaterBody {
     name: row.name,
     water_type: row.water_type ?? null,
     province: row.provinces?.name ?? null,
-    district: row.districts?.name ?? null,
-    latitude: row.latitude == null ? null : Number(row.latitude),
+        latitude: row.latitude == null ? null : Number(row.latitude),
     longitude: row.longitude == null ? null : Number(row.longitude),
     fishing_allowed: null,
     verification_level: row.verification_level ?? null,
@@ -35,7 +34,7 @@ function mapWaterBody(row: any): WaterBody {
   };
 }
 
-export async function getWaterBodies(filters?: { province?: string; district?: string; search?: string }) {
+export async function getWaterBodies(filters?: { province?: string; search?: string }) {
   if (!supabase) return { data: [] as WaterBody[], error: new Error('Supabase yapılandırılmamış') };
   const pageSize = 500;
   const rows: any[] = [];
@@ -52,8 +51,7 @@ export async function getWaterBodies(filters?: { province?: string; district?: s
   const q = filters?.search?.trim().toLocaleLowerCase('tr-TR');
   const data = rows.map(mapWaterBody).filter(item =>
     (!filters?.province || item.province === filters.province) &&
-    (!filters?.district || item.district === filters.district) &&
-    (!q || [item.name, item.province, item.district, item.basin_name]
+        (!q || [item.name, item.province, item.basin_name]
       .filter(Boolean).some(value => String(value).toLocaleLowerCase('tr-TR').includes(q)))
   );
   return { data, error: null };
@@ -65,7 +63,7 @@ export async function getFishingAreas(search?: string) {
   const rows: FishingArea[] = [];
   for (let from = 0; ; from += pageSize) {
     const { data, error } = await supabase.from('fishing_areas')
-      .select('id,source_slug,name,province_name,district_name,zone_name,water_type,source_grade,location_confidence_grade,source_url,source_name,general_note,coordinates_imported,latitude,longitude,coordinate_status,coordinate_note,source_checked_at')
+      .select('id,source_slug,name,province_name,zone_name,water_type,source_grade,location_confidence_grade,source_url,source_name,general_note,coordinates_imported,latitude,longitude,coordinate_status,coordinate_note,source_checked_at')
       .order('name')
       .range(from, from + pageSize - 1);
     if (error) return { data: rows, error };
@@ -73,7 +71,7 @@ export async function getFishingAreas(search?: string) {
     if (!data || data.length < pageSize) break;
   }
   const q = search?.trim().toLocaleLowerCase('tr-TR');
-  return { data: rows.filter(item => !q || [item.name,item.province_name,item.district_name,item.zone_name,item.water_type]
+  return { data: rows.filter(item => !q || [item.name,item.province_name,item.zone_name,item.water_type]
     .filter(Boolean).some(value => String(value).toLocaleLowerCase('tr-TR').includes(q))), error: null };
 }
 
