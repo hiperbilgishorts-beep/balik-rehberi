@@ -34,7 +34,7 @@ export default function MeralarScreen() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { void load(''); }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
   const q = search.trim().toLocaleLowerCase('tr-TR');
   const searchedItems = items.filter(item => !q || [item.name, item.province, item.district, item.basin_name]
@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
   meta: { fontSize: 12, color: '#70817b', marginTop: 4 },
   coord: { fontSize: 11, color: '#087f5b', marginTop: 4 },
   source: { fontSize: 10, color: '#75857f', marginTop: 4 },
+  link: { fontSize: 12, color: '#087f5b', fontWeight: '700', marginTop: 8 },
   chevron: { fontSize: 26, color: '#9aa7a2', marginLeft: 8 },
   state: { alignItems: 'center', padding: 30 },
   error: { textAlign: 'center', color: '#8a4a42', lineHeight: 20 },
