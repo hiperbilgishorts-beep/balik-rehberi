@@ -21,3 +21,13 @@ jobs:
         run: npm run typecheck
       - name: Validate Android JavaScript bundle
         run: npx expo export --platform android
+      - name: Set up Java for Android compilation
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Generate Android native project
+        run: npx expo prebuild --platform android --no-install
+      - name: Compile Android debug APK
+        run: cd android && ./gradlew assembleDebug
