@@ -31,6 +31,28 @@ coordinate_confidence_note = CASE
   ELSE 'Koordinat var ancak izlenebilir kaynak notu eksik; kontrol edin.'
 END;
 
+-- If the recorded map candidate does not exactly match the waterbody name,
+-- lower confidence one step and tell the user to check it; don't hide ambiguity.
+WITH candidate_rows AS (
+  SELECT id,
+    regexp_replace(name,'^[^-]+-[^ ]+ ','') AS core_name,
+    substring(source_reference from 'candidate=([^;|.]+)') AS candidate_name
+  FROM public.water_bodies
+  WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+    AND source_reference LIKE '%candidate=%'
+), normalized AS (
+  SELECT id,
+    regexp_replace(lower(extensions.unaccent(core_name)),'[^a-z0-9]+','','g') AS water_key,
+    regexp_replace(lower(extensions.unaccent(trim(candidate_name))),'[^a-z0-9]+','','g') AS candidate_key
+  FROM candidate_rows
+)
+UPDATE public.water_bodies w
+SET coordinate_confidence_grade='C',
+    coordinate_confidence_note='Kaynakta aday su adı kayıt adıyla birebir eşleşmiyor; genel konum için ek kontrol önerilir.'
+FROM normalized n
+WHERE w.id=n.id AND n.water_key<>n.candidate_key
+  AND w.coordinate_confidence_grade='B';
+
 CREATE TABLE IF NOT EXISTS public.fishing_areas (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   source_slug text NOT NULL UNIQUE,
