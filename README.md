@@ -5,7 +5,7 @@ Türkiye'deki balıkçılık noktalarını, su kaynaklarını, balık türlerini
 ## Proje hedefi
 
 - Türkiye haritasında balık tutulabilecek su kaynaklarını göstermek
-- İl, ilçe, konum ve mesafeye göre filtreleme
+- İl bazında listeleme ve genel su kaynağı koordinatları
 - Balık türüne göre uygun su kaynaklarını bulma
 - Balık türleri için yem, yöntem, mevsim ve boy bilgileri
 - Su kaynağı bazında bulunan türler ve sezon bilgileri
@@ -20,7 +20,7 @@ Veriler mümkün olduğunca resmi Türkiye kaynaklarından doğrulanacak. Tür b
 ## Ana veri katmanları
 
 1. Su kaynakları
-2. İl / ilçe / koordinat
+2. İl / koordinat
 3. Resmi avlaklar
 4. Balık türleri
 5. Su kaynağı - balık ilişkileri
@@ -34,6 +34,15 @@ Veriler mümkün olduğunca resmi Türkiye kaynaklarından doğrulanacak. Tür b
 
 Replit proje geliştirme ortamı olarak kullanılabilir; GitHub bu repository üzerinden ana kod arşivi olarak tutulacaktır. Supabase merkezi veritabanıdır. Replit limitleri nedeniyle geliştirme ortamı değişse bile proje bağımsız şekilde sürdürülebilmelidir.
 
+## Supabase ortam değişkenleri
+
+Yerel geliştirme için `.env.example` dosyasını `.env` olarak kopyala ve gerçek proje bilgileriyle doldur:
+
+- `EXPO_PUBLIC_SUPABASE_URL`
+- `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+Mobil uygulamada yalnızca publishable key kullanılmalıdır; secret/service-role key uygulama paketine konulmamalıdır. GitHub Actions tarafında aynı adlarla repository secrets tanımlandığında REST bağlantı testi gerçek veritabanına bağlanır. Android debug APK, başarılı CI çalışmasının artifact bölümünden alınabilir.
+
 ## Güvenlik
 
-Supabase parolaları, API secret'ları ve kişisel erişim anahtarları repository'ye kesinlikle eklenmemelidir. Hassas yapılandırmalar ortam değişkenlerinde tutulmalıdır.
+Supabase parolaları, secret/service-role API anahtarları ve kişisel erişim anahtarları repository'ye kesinlikle eklenmemelidir. Hassas yapılandırmalar ortam değişkenlerinde tutulmalıdır.
