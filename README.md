@@ -27,12 +27,15 @@ Veriler mümkün olduğunca resmi Türkiye kaynaklarından doğrulanacak. Tür b
 6. Yemler
 7. Av yöntemleri
 8. Mevsimsel aktivite
-9. Av kuralları ve yasak dönemler
-10. Kaynaklar ve doğrulama kayıtları
+9. Av kuralları ve doğrulama kayıtları
 
-## Geliştirme stratejisi
+## Geliştirme ve Android test sürümü
 
 Replit proje geliştirme ortamı olarak kullanılabilir; GitHub bu repository üzerinden ana kod arşivi olarak tutulacaktır. Supabase merkezi veritabanıdır. Replit limitleri nedeniyle geliştirme ortamı değişse bile proje bağımsız şekilde sürdürülebilmelidir.
+
+**Önemli:** `assembleDebug` ile üretilen debug APK, uygulamanın JavaScript kodunu bilgisayardaki Metro geliştirme sunucusundan almaya çalışır. Bu APK telefona tek başına yüklendiğinde `localhost` / Metro bağlantı hatası verebilir. Telefonda bilgisayara bağlı olmadan açılabilen sürüm için GitHub Actions'ın **balik-rehberi-android-standalone-apk** artifact'ındaki `app-release.apk` kullanılmalıdır. Release APK, uygulama JS paketini kendi içinde taşır; Supabase verileri ise internet üzerinden alınır. Bu değişiklikten sonra ilk yeni GitHub Actions çalışmasının başarıyla tamamlanması gerekir.
+
+Geliştirme sırasında Expo Go ile çalışıyorsan Metro yine gereklidir. Aynı Wi-Fi ağı üzerinden bağlantı kurulamıyorsa `npx expo start --tunnel` kullanılabilir. Bu geliştirme bağlantısıdır; son kullanıcıya verilecek bağımsız APK ile karıştırılmamalıdır.
 
 ## Supabase ortam değişkenleri
 
@@ -41,7 +44,7 @@ Yerel geliştirme için `.env.example` dosyasını `.env` olarak kopyala ve ger�
 - `EXPO_PUBLIC_SUPABASE_URL`
 - `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
-Mobil uygulamada yalnızca publishable key kullanılmalıdır; secret/service-role key uygulama paketine konulmamalıdır. GitHub Actions tarafında aynı adlarla repository secrets tanımlandığında REST bağlantı testi gerçek veritabanına bağlanır. Android debug APK, başarılı CI çalışmasının artifact bölümünden alınabilir.
+Mobil uygulamada yalnızca publishable key kullanılmalıdır; secret/service-role key uygulama paketine konulmamalıdır. GitHub Actions tarafında aynı adlarla tanımlanan değişkenler REST bağlantı testinde kullanılır.
 
 ## Güvenlik
 
