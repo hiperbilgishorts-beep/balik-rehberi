@@ -4,14 +4,13 @@ import { router } from 'expo-router';
 import { getWaterBodies } from '../src/lib/data';
 import type { WaterBody } from '../src/types/database';
 
-type Filter = 'all' | 'reservoir' | 'natural_lake' | 'pond' | 'river';
+type Filter = 'all' | 'reservoir' | 'natural_lake' | 'pond';
 
 const filters: { key: Filter; label: string }[] = [
   { key: 'all', label: 'Tümü' },
   { key: 'reservoir', label: 'Barajlar' },
   { key: 'natural_lake', label: 'Göller' },
   { key: 'pond', label: 'Göletler' },
-  { key: 'river', label: 'Akarsular' },
 ];
 
 export default function MeralarScreen() {
@@ -21,16 +20,16 @@ export default function MeralarScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async (query = search) => {
+  const load = useCallback(async (query = '') => {
     setLoading(true);
     setError(null);
     const result = await getWaterBodies({ search: query });
     if (result.error) setError('Su kaynakları yüklenemedi. Bağlantını kontrol edip tekrar dene.');
     setItems(result.data);
     setLoading(false);
-  }, [search]);
+  }, []);
 
-  useEffect(() => { load(''); }, []);
+  useEffect(() => { void load(''); }, [load]);
 
   const filtered = items.filter(item => filter === 'all' || item.water_type === filter);
 
@@ -38,12 +37,12 @@ export default function MeralarScreen() {
     <View style={styles.header}>
       <Pressable onPress={() => router.back()}><Text style={styles.back}>‹ Geri</Text></Pressable>
       <Text style={styles.title}>Meralar & Su Kaynakları</Text>
-      <Text style={styles.subtitle}>Baraj, göl, gölet ve akarsuların genel konumlarını keşfet. İşaretler balık tutulacak kesin noktayı veya kıyıya erişim iznini göstermez.</Text>
+      <Text style={styles.subtitle}>Baraj, göl ve göletlerin genel konumlarını keşfet. Harita işaretleri kesin balık tutma noktası veya kıyıya erişim izni anlamına gelmez.</Text>
     </View>
-    <TextInput value={search} onChangeText={v => { setSearch(v); load(v); }} placeholder="Su kaynağı veya il ara..." placeholderTextColor="#7b8794" style={styles.input} />
+    <TextInput value={search} onChangeText={v => { setSearch(v); void load(v); }} placeholder="Su kaynağı veya il ara..." placeholderTextColor="#7b8794" style={styles.input} />
     <View style={styles.filters}>{filters.map(item => <Pressable key={item.key} onPress={() => setFilter(item.key)} style={[styles.filter, filter === item.key && styles.filterActive]}><Text style={[styles.filterText, filter === item.key && styles.filterTextActive]}>{item.label}</Text></Pressable>)}</View>
     <Pressable style={styles.mapButton} onPress={() => router.push('/map')}><Text style={styles.mapButtonText}>Haritada keşfet ↗</Text></Pressable>
-    {loading ? <ActivityIndicator size="large" style={{ marginTop: 28 }} /> : error ? <View style={styles.state}><Text style={styles.error}>{error}</Text><Pressable onPress={() => load()} style={styles.retry}><Text style={styles.retryText}>Tekrar dene</Text></Pressable></View> : <FlatList data={filtered.slice(0, 100)} keyExtractor={item => item.id} contentContainerStyle={{ paddingBottom: 24 }} ListHeaderComponent={<Text style={styles.count}>{filtered.length} kayıt gösteriliyor</Text>} renderItem={({ item }) => <Pressable style={styles.card} onPress={() => router.push({ pathname: '/water-body/[id]', params: { id: item.id } })}><View style={styles.pin}><Text style={styles.pinText}>{item.water_type === 'reservoir' ? 'B' : item.water_type === 'natural_lake' ? 'G' : item.water_type === 'pond' ? 'G' : 'A'}</Text></View><View style={{ flex: 1 }}><Text style={styles.cardTitle}>{item.name}</Text><Text style={styles.meta}>{[item.province, item.district, item.water_type === 'reservoir' ? 'Baraj' : item.water_type === 'natural_lake' ? 'Göl' : item.water_type === 'pond' ? 'Gölet' : item.water_type].filter(Boolean).join(' • ')}</Text><Text style={styles.coord}>{item.latitude != null && item.longitude != null ? 'Genel konum mevcut' : 'Konum doğrulaması bekleniyor'}</Text></View><Text style={styles.chevron}>›</Text></Pressable>} ListEmptyComponent={<Text style={styles.empty}>Bu filtrede su kaynağı bulunamadı.</Text>} />}
+    {loading ? <ActivityIndicator size="large" style={{ marginTop: 28 }} /> : error ? <View style={styles.state}><Text style={styles.error}>{error}</Text><Pressable onPress={() => load(search)} style={styles.retry}><Text style={styles.retryText}>Tekrar dene</Text></Pressable></View> : <FlatList data={filtered.slice(0, 100)} keyExtractor={item => item.id} contentContainerStyle={{ paddingBottom: 24 }} ListHeaderComponent={<Text style={styles.count}>{filtered.length} kayıt gösteriliyor</Text>} renderItem={({ item }) => <Pressable style={styles.card} onPress={() => router.push({ pathname: '/water-body/[id]', params: { id: item.id } })}><View style={styles.pin}><Text style={styles.pinText}>{item.water_type === 'reservoir' ? 'B' : 'G'}</Text></View><View style={{ flex: 1 }}><Text style={styles.cardTitle}>{item.name}</Text><Text style={styles.meta}>{[item.province, item.district, item.water_type === 'reservoir' ? 'Baraj' : item.water_type === 'natural_lake' ? 'Göl' : 'Gölet'].filter(Boolean).join(' • ')}</Text><Text style={styles.coord}>{item.latitude != null && item.longitude != null ? 'Genel konum mevcut' : 'Konum doğrulaması bekleniyor'}</Text></View><Text style={styles.chevron}>›</Text></Pressable>} ListEmptyComponent={<Text style={styles.empty}>Bu filtrede su kaynağı bulunamadı.</Text>} />}
   </SafeAreaView>;
 }
 
