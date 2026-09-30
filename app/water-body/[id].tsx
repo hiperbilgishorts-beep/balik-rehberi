@@ -95,7 +95,7 @@ export default function WaterBodyDetailScreen() {
       <View style={styles.hero}>
         <Text style={styles.eyebrow}>BALIK REHBERİ · SU KAYNAĞI</Text>
         <Text style={styles.title}>{w.name}</Text>
-        <Text style={styles.location}>{[w.district, w.province].filter(Boolean).join(' · ') || 'Konum bilgisi bulunmuyor'}</Text>
+        <Text style={styles.location}>{[w.province].filter(Boolean).join(' · ') || 'Konum bilgisi bulunmuyor'}</Text>
         <View style={styles.badge}><Text style={styles.badgeText}>{typeLabel}</Text></View>
         <Text style={styles.heroNote}>Bu sayfa su kaynağını ve genel konumunu tanıtır. Belirli bir kıyı noktasına erişim veya avlanma izni anlamına gelmez.</Text>
       </View>
@@ -104,7 +104,6 @@ export default function WaterBodyDetailScreen() {
         <Text style={styles.section}>Genel bilgiler</Text>
         <View style={styles.grid}>
           <Info label="İl" value={w.province || 'Belirtilmemiş'} />
-          <Info label="İlçe" value={w.district || 'Belirtilmemiş'} />
           <Info label="Su türü" value={typeLabel} />
           <Info label="Erişim bilgisi" value={w.access_level || 'Yerinde kontrol edilmeli'} />
           <Info label="Son bilgi kontrolü" value={w.last_verified_at ? new Date(w.last_verified_at).toLocaleDateString('tr-TR') : 'Belirtilmemiş'} />
