@@ -3,7 +3,6 @@ export type WaterBody = {
   name: string;
   water_type: string | null;
   province: string | null;
-  district: string | null;
   latitude: number | null;
   longitude: number | null;
   fishing_allowed: boolean | null;
@@ -55,4 +54,4 @@ export type WeatherSnapshot = { id: string; spot_id: string | null; latitude: nu
 export type SpotReport = { id: string; spot_id: string; report_type: 'catch' | 'access' | 'closure' | 'hazard' | 'species' | 'update'; title: string | null; body: string; observed_at: string | null; status: string; created_at: string };
 export type TripPlan = { id: string; title: string; notes: string | null; planned_start: string | null; planned_end: string | null; status: 'draft' | 'planned' | 'completed' | 'cancelled'; created_at: string; updated_at: string };
 
-export type FishingArea = { id: string; source_slug: string; name: string; province_name: string | null; district_name: string | null; zone_name: string | null; water_type: string | null; source_grade: 'A' | 'B' | 'C' | 'D'; location_confidence_grade: string; source_url: string; source_name: string; general_note: string; coordinates_imported: boolean; latitude: number | null; longitude: number | null; coordinate_status: string; coordinate_note: string | null; source_checked_at: string };
+export type FishingArea = { id: string; source_slug: string; name: string; province_name: string | null; zone_name: string | null; water_type: string | null; source_grade: 'A' | 'B' | 'C' | 'D'; location_confidence_grade: string; source_url: string; source_name: string; general_note: string; coordinates_imported: boolean; latitude: number | null; longitude: number | null; coordinate_status: string; coordinate_note: string | null; source_checked_at: string };
