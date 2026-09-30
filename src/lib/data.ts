@@ -1,17 +1,6 @@
 import { supabase } from '../config/supabase';
 import type { Fish, FishActivity, FishDetail, FishingArea, WaterBody, WaterBodyDetail, WaterBodyDistance } from '../types/database';
 
-let regulationSyncPromise: Promise<unknown> | null = null;
-
-export async function syncFishingRules() {
-  if (!supabase) return { ok: false, error: new Error('Supabase yapılandırılmamış') };
-  if (regulationSyncPromise) return regulationSyncPromise;
-  regulationSyncPromise = supabase.functions.invoke('sync-fishing-rules', { body: { reason: 'app_connection' } })
-    .then(({ data, error }) => ({ ok: !error && data?.ok !== false, data, error }))
-    .finally(() => { regulationSyncPromise = null; });
-  return regulationSyncPromise;
-}
-
 const waterSelect = 'id,name,normalized_name,water_type,province_id,district_id,latitude,longitude,basin_name,description,source_id,verification_level,verification_status,last_verified_at,source_checked_at,source_reference,fishing_relevance,fishing_relevance_confidence,coordinate_confidence_grade,coordinate_confidence_note,community_confidence_grade,provinces(name),districts(name),sources(name,url,verification_status)';
 
 function mapWaterBody(row: any): WaterBody {
