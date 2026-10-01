@@ -49,7 +49,6 @@ export default function MeralarScreen() {
 
   return <SafeAreaView style={styles.container}>
     <View style={styles.header}>
-      <Pressable onPress={() => router.back()}><Text style={styles.back}>‹ Geri</Text></Pressable>
       <Text style={styles.title}>Meralar & Su Kaynakları</Text>
       <Text style={styles.subtitle}>Baraj, göl ve göletlerin genel konumlarını keşfet. Harita işaretleri kesin balık tutma noktası veya kıyıya erişim izni anlamına gelmez.</Text>
     </View>
@@ -59,6 +58,7 @@ export default function MeralarScreen() {
     {showAtlas && <View style={styles.filters}><Pressable onPress={() => setAreaType('')} style={[styles.filter, !areaType && styles.filterActive]}><Text style={[styles.filterText, !areaType && styles.filterTextActive]}>Tüm türler</Text></Pressable>{areaTypes.map(type => <Pressable key={type} onPress={() => setAreaType(areaType === type ? '' : type)} style={[styles.filter, areaType === type && styles.filterActive]}><Text style={[styles.filterText, areaType === type && styles.filterTextActive]}>{type}</Text></Pressable>)}</View>}
     {!showAtlas && <Pressable style={styles.mapButton} onPress={() => router.push('/map')}><Text style={styles.mapButtonText}>Haritada keşfet ↗</Text></Pressable>}
     {loading ? <ActivityIndicator size="large" style={{ marginTop: 28 }} /> : error ? <View style={styles.state}><Text style={styles.error}>{error}</Text><Pressable onPress={() => load()} style={styles.retry}><Text style={styles.retryText}>Tekrar dene</Text></Pressable></View> : showAtlas ? <FlatList data={filteredAreas} keyExtractor={item => item.id} contentContainerStyle={{ paddingBottom: 24 }} ListHeaderComponent={<Text style={styles.count}>{filteredAreas.length} mera kaydı</Text>} renderItem={({ item }) => <View style={styles.card}><View style={[styles.pin,{backgroundColor:'#e4edf9'}]}><Text style={[styles.pinText,{color:'#315d91'}]}>M</Text></View><View style={{ flex: 1 }}><Text style={styles.cardTitle}>{item.name}</Text><Text style={styles.meta}>{[item.province_name,item.water_type].filter(Boolean).join(' • ')}</Text>{item.general_note ? <Text style={styles.source}>{item.general_note}</Text> : null}{item.coordinate_note ?  : null}{item.latitude != null && item.longitude != null ? <Pressable onPress={() => Linking.openURL('https://www.google.com/maps/search/?api=1&query=' + item.latitude + ',' + item.longitude)}><Text style={styles.link}>Genel konumu haritada aç ↗</Text></Pressable> : null}<Pressable onPress={() => Linking.openURL(item.source_url)}><Text style={styles.link}>Kaynak sayfasını aç ↗</Text></Pressable></View></View>} ListEmptyComponent={<Text style={styles.empty}>Bu aramada mera bulunamadı.</Text>} /> : <FlatList data={filtered} keyExtractor={item => item.id} contentContainerStyle={{ paddingBottom: 24 }} ListHeaderComponent={<Text style={styles.count}>{filtered.length} su kaynağı</Text>} renderItem={({ item }) => <Pressable style={styles.card} onPress={() => router.push({ pathname: '/water-body/[id]', params: { id: item.id } })}><View style={styles.pin}><Text style={styles.pinText}>{item.water_type === 'river' || item.water_type === 'stream' || item.water_type === 'watercourse' ? 'A' : item.water_type === 'reservoir' ? 'B' : 'G'}</Text></View><View style={{ flex: 1 }}><Text style={styles.cardTitle}>{item.name}</Text><Text style={styles.meta}>{[item.province, item.water_type === 'reservoir' ? 'Baraj' : item.water_type === 'natural_lake' ? 'Göl' : 'Gölet'].filter(Boolean).join(' • ')}</Text></View><Text style={styles.chevron}>›</Text></Pressable>} ListEmptyComponent={<Text style={styles.empty}>Bu filtrede su kaynağı bulunamadı.</Text>} />}
+    <View style={styles.bottomBar}><Pressable onPress={() => router.back()} style={styles.bottomBack}><Text style={styles.bottomBackText}>‹  Geri</Text></Pressable><Text style={styles.bottomHint}>Balık Rehberi</Text></View>
   </SafeAreaView>;
 }
 
@@ -66,6 +66,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f6f8f7', paddingHorizontal: 16 },
   header: { paddingTop: 12, paddingBottom: 14 },
   back: { color: '#087f5b', fontSize: 16, fontWeight: '700', marginBottom: 14 },
+  bottomBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 10, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#dbe5e1' },
+  bottomBack: { backgroundColor: '#e2eee9', borderRadius: 11, paddingHorizontal: 15, paddingVertical: 9 },
+  bottomBackText: { color: '#125744', fontWeight: '900', fontSize: 14 },
+  bottomHint: { color: '#84928b', fontSize: 11 },
   title: { fontSize: 25, fontWeight: '800', color: '#123b32' },
   subtitle: { fontSize: 13, color: '#61706b', lineHeight: 19, marginTop: 7 },
   input: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#dce5e1', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15 },
