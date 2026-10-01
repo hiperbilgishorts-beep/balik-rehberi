@@ -91,7 +91,6 @@ export default function WaterBodyDetailScreen() {
 
   return <SafeAreaView style={styles.container}>
     <ScrollView contentContainerStyle={styles.content}>
-      <Pressable onPress={() => router.back()}><Text style={styles.back}>‹ Geri</Text></Pressable>
       <View style={styles.hero}>
         <Text style={styles.eyebrow}>BALIK REHBERİ · SU KAYNAĞI</Text>
         <Text style={styles.title}>{w.name}</Text>
@@ -106,18 +105,8 @@ export default function WaterBodyDetailScreen() {
           <Info label="İl" value={w.province || 'Belirtilmemiş'} />
           <Info label="Su türü" value={typeLabel} />
           <Info label="Erişim bilgisi" value={w.access_level || 'Yerinde kontrol edilmeli'} />
-          <Info label="Son bilgi kontrolü" value={w.last_verified_at ? new Date(w.last_verified_at).toLocaleDateString('tr-TR') : 'Belirtilmemiş'} />
         </View>
         {w.description ? <Text style={styles.body}>{w.description}</Text> : <Text style={styles.muted}>Bu su kaynağı için ek açıklama henüz eklenmemiş.</Text>}
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.section}>Kaynak bilgisi</Text>
-        <Text style={styles.muted}>Konum bilgisi kaynak kayıtları üzerinden incelenir. Kaynak veya koordinat eşleşmesi güncellendikçe bu bölüm de güncellenebilir.</Text>
-        {w.source_name ? <Text style={styles.sourceName}>Kaynak: {w.source_name}</Text> : null}
-        {w.source_url ? <Pressable onPress={() => Linking.openURL(w.source_url!)}><Text style={styles.link}>Kaynak sayfasını görüntüle ↗</Text></Pressable> : null}
-        {w.source_reference && w.source_reference !== w.source_url ? <Text style={styles.source}>{w.source_reference}</Text> : null}
-        {!w.source_url && !w.source_reference ? <Text style={styles.warning}>Bu kayıt için doğrudan kaynak bağlantısı henüz eklenmemiş.</Text> : null}
       </View>
 
       <View style={styles.card}>
@@ -127,8 +116,8 @@ export default function WaterBodyDetailScreen() {
           <Text style={styles.muted}>İşaret, su kaynağının genel konumunu gösterir; kıyı girişi veya güvenli varış noktası değildir.</Text>
           <Pressable style={styles.mapButton} onPress={showNavigationOptions}><Text style={styles.mapButtonText}>Haritada aç ↗</Text></Pressable>
         </> : <>
-          <Text style={styles.muted}>Bu kayıt için koordinat henüz eklenmemiş. Konum bilgisi doğrulandığında burada gösterilecek.</Text>
-          <View style={styles.pendingPill}><Text style={styles.pendingText}>Konum kontrolü bekliyor</Text></View>
+          <Text style={styles.muted}>Bu su kaynağı için harita konumu şu anda görüntülenemiyor.</Text>
+          
         </>}
       </View>
 
@@ -161,6 +150,7 @@ export default function WaterBodyDetailScreen() {
         </>}
       </View>
     </ScrollView>
+    <View style={styles.bottomBar}><Pressable onPress={() => router.back()} style={styles.bottomBack}><Text style={styles.bottomBackText}>‹  Geri</Text></Pressable><Text style={styles.bottomHint}>Balık Rehberi</Text></View>
   </SafeAreaView>;
 }
 
@@ -173,6 +163,10 @@ const styles = StyleSheet.create({
   content: { padding: 18, paddingBottom: 38 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
   back: { fontWeight: '800', color: '#087f5b', marginBottom: 14 },
+  bottomBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 10, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#dbe5e1' },
+  bottomBack: { backgroundColor: '#e2eee9', borderRadius: 11, paddingHorizontal: 15, paddingVertical: 9 },
+  bottomBackText: { color: '#125744', fontWeight: '900', fontSize: 14 },
+  bottomHint: { color: '#84928b', fontSize: 11 },
   hero: { backgroundColor: '#123b32', borderRadius: 20, padding: 20, marginBottom: 2 },
   eyebrow: { color: '#a9d8c6', fontSize: 10, fontWeight: '800', letterSpacing: 1.1, marginBottom: 10 },
   title: { fontSize: 29, fontWeight: '900', color: '#fff', lineHeight: 35 },
