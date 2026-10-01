@@ -6,9 +6,30 @@
     "orientation": "portrait",
     "scheme": "balikrehberi",
     "userInterfaceStyle": "automatic",
-    "ios": { "supportsTablet": true, "bundleIdentifier": "tr.balikrehberi.app" },
-    "android": { "package": "tr.balikrehberi.app" },
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#073b35"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "tr.balikrehberi.app"
+    },
+    "android": {
+      "package": "tr.balikrehberi.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#073b35"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
     "plugins": ["expo-router", "expo-location"],
-    "experiments": { "typedRoutes": true }
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }
