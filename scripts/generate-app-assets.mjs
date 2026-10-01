@@ -1,8 +1,13 @@
 import { mkdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import sharp from 'sharp';
 
-await mkdir(new URL('../assets/', import.meta.url), { recursive: true });
-const asset = (name) => new URL(`../assets/${name}`, import.meta.url);
+const root = dirname(fileURLToPath(import.meta.url));
+const assets = join(root, '..', 'assets');
+await mkdir(assets, { recursive: true });
+const asset = (name) => join(assets, name);
+
 await sharp(asset('icon.svg')).resize(1024, 1024).png().toFile(asset('icon.png'));
 await sharp(asset('adaptive-icon.svg')).resize(1024, 1024).png().toFile(asset('adaptive-icon.png'));
 await sharp(asset('icon.svg')).resize(64, 64).png().toFile(asset('favicon.png'));
