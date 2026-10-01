@@ -28,9 +28,8 @@ Geri bildirim kayıtları Supabase veritabanında saklanır. Erişim denetimleri
 Uygulama özellikle çocuklara yönelik tasarlanmamıştır. Bir çocuğun kişisel bilgilerini bilerek toplamayı amaçlamaz.
 
 ## Haklarınız ve iletişim
-Geri bildirimle ilişkili anonim oturum veya kayıtlar hakkında talepte bulunmak, gizlilik sorusu sormak ya da bu politikayı görüşmek için uygulamanın Google Play mağaza sayfasında yayımlanacak destek iletişim adresini kullanabilirsiniz.
+Geri bildirimle ilişkili anonim oturum veya kayıtlar hakkında talepte bulunmak, gizlilik sorusu sormak ya da bu politikayı görüşmek için uygulamanın Google Play mağaza sayfasında belirtilen geliştirici iletişim adresini kullanabilirsiniz.
 
-**Yayın öncesi not:** Mağazaya gönderilmeden önce bu belgede geliştiricinin geçerli destek e-posta adresi ve Supabase/Google Play veri güvenliği beyanları doğrulanmalı ve gerekirse eklenmelidir.
 
 ## Değişiklikler
 Uygulama özellikleri veya veri uygulamaları değişirse bu politika güncellenebilir. Güncel sürüm, bu belgenin yayımlandığı adreste bulunur.
