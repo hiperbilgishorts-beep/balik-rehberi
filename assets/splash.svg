@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1242" height="2436" viewBox="0 0 1242 2436">
+  <rect width="1242" height="2436" fill="#073b35"/>
+  <circle cx="621" cy="1020" r="330" fill="none" stroke="#1c8a72" stroke-width="24"/>
+  <circle cx="621" cy="1020" r="286" fill="none" stroke="#7ed8bd" stroke-width="6" opacity=".55"/>
+  <path d="M350 1028 C420 917 580 892 714 967 C754 989 786 1014 814 1042 C786 1070 754 1095 714 1117 C580 1192 420 1167 350 1056 L270 1124 L291 1042 L270 960 Z" fill="#f7b84b"/>
+  <path d="M524 936 C554 976 559 1002 545 1030 C582 1022 620 998 639 961 C650 1007 635 1042 599 1068 C568 1091 535 1101 501 1104 C529 1070 541 1044 539 1017 C537 989 529 961 524 936Z" fill="#e28d31"/>
+  <circle cx="706" cy="1000" r="28" fill="#073b35"/><circle cx="714" cy="992" r="8" fill="#fff"/>
+  <path d="M391 1227 C485 1192 573 1192 665 1227 C758 1262 843 1262 931 1227" fill="none" stroke="#78d8c1" stroke-width="22" stroke-linecap="round"/>
+  <path d="M444 1282 C518 1257 587 1257 659 1282 C732 1307 797 1307 869 1282" fill="none" stroke="#2eaa8b" stroke-width="17" stroke-linecap="round"/>
+  <text x="621" y="1510" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="68" font-weight="800" letter-spacing="3" fill="#ffffff">BALIK REHBERİ</text>
+  <text x="621" y="1584" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="500" fill="#a9d9cc">TÜRKİYE</text>
+</svg>
