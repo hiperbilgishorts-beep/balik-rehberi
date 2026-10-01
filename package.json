@@ -10,7 +10,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "verify:supabase": "node scripts/verify-supabase.mjs"
+    "verify:supabase": "node scripts/verify-supabase.mjs",
+    "postinstall": "node scripts/generate-app-assets.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "15.0.3",
@@ -23,7 +24,8 @@
     "react-native": "0.86.3",
     "react-native-maps": "1.27.1",
     "react-native-safe-area-context": "5.6.2",
-    "react-native-screens": "4.19.0"
+    "react-native-screens": "4.19.0",
+    "sharp": "0.34.3"
   },
   "devDependencies": {
     "typescript": "~5.9.3"
