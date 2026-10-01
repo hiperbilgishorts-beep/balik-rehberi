@@ -3,6 +3,8 @@ name: TypeScript validation and standalone Android APK build
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'supabase/seeds/**'
   pull_request:
 
 jobs:
