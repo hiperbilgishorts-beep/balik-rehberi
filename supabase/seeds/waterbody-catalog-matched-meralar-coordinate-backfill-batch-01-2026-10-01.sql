@@ -1,3 +1,24 @@
+-- Helper normalization function used for exact name matching.
+CREATE OR REPLACE FUNCTION internal.water_name_key(t text)
+RETURNS text
+LANGUAGE sql
+IMMUTABLE
+PARALLEL SAFE
+SET search_path TO 'pg_catalog', 'extensions', 'public', 'internal', 'auth'
+AS $function$
+  SELECT regexp_replace(
+    regexp_replace(
+      regexp_replace(
+        ' ' || regexp_replace(lower(extensions.unaccent(coalesce(t, ''))), '[^a-z0-9]+', ' ', 'g') || ' ',
+        ' (baraj golu|barajgolu|baraji|baraj|goleti|golet|golu|gol|dam|reservoirs|reservoir|lake|pond|akarsu|deresi|cayi|nehri|cay|nehir) ',
+        ' ', 'g'
+      ),
+      '\\s+', ' ', 'g'
+    ),
+    ' ', '', 'g'
+  )
+$function$;
+
 -- Backfill missing Olta Atlası mera coordinates from exact normalized water-body catalog matches.
 -- This batch only copies general waterbody coordinates when the normalized name and province match.
 -- It does not add fishing-access points or infer coordinates from settlements.
