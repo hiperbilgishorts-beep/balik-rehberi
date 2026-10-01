@@ -61,7 +61,7 @@ SET latitude = i.latitude,
     coordinate_status = 'province_checked_source_candidate',
     coordinate_note = 'Olta Atlası page-level spatialCoverage candidate; exact mera name and province matched; general location only; not independently cross-checked against OSM/official source; not fishing access or permission.',
     location_confidence_grade = 'D',
-    source_checked_at = i.source_checked_at,
+    source_checked_at = i.source_checked_at::timestamptz,
     updated_at = now()
 FROM input AS i
 WHERE a.id = i.id
