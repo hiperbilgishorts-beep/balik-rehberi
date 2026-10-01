@@ -5,7 +5,13 @@ on:
     branches: [main]
     paths-ignore:
       - 'supabase/seeds/**'
+      - 'docs/**'
+      - 'PRIVACY_POLICY.md'
   pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   typecheck:
