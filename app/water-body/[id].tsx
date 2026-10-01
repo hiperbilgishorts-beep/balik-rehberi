@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { getWaterBodyDetail } from '../../src/lib/data';
-import type { WaterBodyDetail } from '../../src/types/database';
+import { getFishingAreas, getWaterBodyDetail } from '../../src/lib/data';
+import type { FishingArea, WaterBodyDetail } from '../../src/types/database';
 import { supabase } from '../../src/config/supabase';
 
 export default function WaterBodyDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [detail, setDetail] = useState<WaterBodyDetail | null>(null);
+  const [atlasArea, setAtlasArea] = useState<FishingArea | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [feedbackBusy, setFeedbackBusy] = useState(false);
@@ -21,11 +22,30 @@ export default function WaterBodyDetailScreen() {
       setError('Su kaynağı kimliği bulunamadı.');
       return;
     }
-    getWaterBodyDetail(id).then(r => {
-      setDetail(r.data);
-      setError(r.error?.message ?? null);
-      setLoading(false);
-    });
+    let alive = true;
+    const normalize = (value: string | null | undefined) => (value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('tr-TR').replace(/[^a-z0-9]/g, '');
+    const core = (value: string) => normalize(value.replace(/^[^-]+-/, ''));
+    void (async () => {
+      try {
+        const r = await getWaterBodyDetail(id);
+        if (!alive) return;
+        setDetail(r.data);
+        setError(r.error?.message ?? null);
+        if (r.data?.waterBody) {
+          const areaResult = await getFishingAreas();
+          if (alive && !areaResult.error) {
+            const water = r.data.waterBody;
+            const match = areaResult.data.find(area => core(area.name) === core(water.name) && (!area.province_name || !water.province || normalize(area.province_name) === normalize(water.province)));
+            setAtlasArea(match ?? null);
+          }
+        }
+      } catch {
+        if (alive) setError('Su kaynağı bilgileri yüklenemedi. Lütfen tekrar dene.');
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => { alive = false; };
   }, [id]);
 
   const submitFeedback = async (vote: 'correct' | 'incorrect' | 'unclear') => {
@@ -121,6 +141,28 @@ export default function WaterBodyDetailScreen() {
         </>}
       </View>
 
+
+      <View style={styles.card}>
+        <Text style={styles.section}>Kaynaklar ve doğrulama</Text>
+        <Text style={styles.sourceName}>Balık Rehberi veri kaydı</Text>
+        {w.source_name ? <Text style={styles.muted}>Kaynak: {w.source_name}{w.source_status ? ' · ' + w.source_status : ''}</Text> : <Text style={styles.muted}>Kaynak adı ayrıca belirtilmemiş.</Text>}
+        {w.source_url ? <Pressable onPress={() => { void Linking.openURL(w.source_url!).catch(() => Alert.alert('Bağlantı açılamadı', 'Kaynak sayfası açılamadı.')); }}><Text style={styles.link}>Balık Rehberi kaynak bağlantısı ↗</Text></Pressable> : null}
+        {w.source_reference ? <Text style={styles.source}>{w.source_reference}</Text> : null}
+        <View style={styles.grid}><Info label="Doğrulama durumu" value={w.verification_status || 'Belirtilmemiş'} /><Info label="Koordinat güveni" value={w.coordinate_confidence_grade || w.verification_level || 'Belirtilmemiş'} /></View>
+        {w.last_verified_at ? <Text style={styles.muted}>Son kontrol: {new Date(w.last_verified_at).toLocaleDateString('tr-TR')}</Text> : <Text style={styles.muted}>Son kontrol tarihi kayıtlı değil.</Text>}
+        <View style={styles.sourceDivider} />
+        <Text style={styles.sourceName}>Olta Atlası</Text>
+        {atlasArea ? <>
+          <Text style={styles.muted}>Aynı ad ve il bilgisiyle eşleşen mera kaydı bulundu. Bu eşleşme genel konum bilgisidir; erişim veya avlanma izni doğrulaması değildir.</Text>
+          {atlasArea.general_note ? <Text style={styles.source}>{atlasArea.general_note}</Text> : null}
+          <Text style={styles.muted}>Konum güveni: {atlasArea.location_confidence_grade || atlasArea.source_grade || 'Belirtilmemiş'}{atlasArea.source_checked_at ? ' · Kontrol: ' + new Date(atlasArea.source_checked_at).toLocaleDateString('tr-TR') : ''}</Text>
+          <Pressable onPress={() => { void Linking.openURL(atlasArea.source_url).catch(() => Alert.alert('Bağlantı açılamadı', 'Olta Atlası kaydı açılamadı.')); }}><Text style={styles.link}>Eşleşen Olta Atlası kaydını aç ↗</Text></Pressable>
+        </> : <>
+          <Text style={styles.muted}>Bu kayıt için yeterince net bir Olta Atlası eşleşmesi bulunamadı; yanlış kayıt ilişkilendirilmedi.</Text>
+          <Pressable onPress={() => { void Linking.openURL('https://oltaatlasi.com/meralar/').catch(() => Alert.alert('Bağlantı açılamadı', 'Olta Atlası sayfası açılamadı.')); }}><Text style={styles.link}>Olta Atlası mera dizinini aç ↗</Text></Pressable>
+        </>}
+      </View>
+
       <View style={styles.card}>
         <Text style={styles.section}>Bu su kaynağında raporlanan balıklar</Text>
         {detail.fish.length === 0 ? <Text style={styles.muted}>Henüz ilişkilendirilmiş tür kaydı bulunmuyor.</Text> : detail.fish.map(f => <Pressable key={f.id} onPress={() => router.push(`/fish/${f.id}`)} style={styles.fishRow}>
@@ -182,7 +224,8 @@ const styles = StyleSheet.create({
   infoValue: { fontWeight: '800', color: '#17352e', marginTop: 4, fontSize: 13 },
   muted: { color: '#71817b', lineHeight: 19, fontSize: 13 },
   body: { color: '#4f625b', lineHeight: 20, marginTop: 10, fontSize: 13 },
-  sourceName: { fontWeight: '700', color: '#315e50', marginTop: 12 },
+  sourceName: { fontWeight: '800', color: '#315e50', marginTop: 8, marginBottom: 5 },
+  sourceDivider: { height: 1, backgroundColor: '#e4ece7', marginVertical: 14 },
   source: { fontSize: 11, color: '#71817b', marginTop: 8, lineHeight: 16 },
   warning: { color: '#765c20', lineHeight: 19, marginTop: 10 },
   coordinates: { fontSize: 18, fontWeight: '800', color: '#17352e', marginBottom: 8 },
